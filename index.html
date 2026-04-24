@@ -2,6 +2,22 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#1A1025">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Routines">
+<meta name="description" content="Créez vos routines et exécutez-les tâche par tâche.">
+<link rel="manifest" href="https://kiffinja.github.io/routines-app/manifest.json">
+<link rel="apple-touch-icon" href="https://kiffinja.github.io/routines-app/icon-192.png">
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("https://kiffinja.github.io/routines-app/sw.js",{scope:"/"}).catch(()=>{});
+  });
+}
+</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Routines</title>
 <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Boogaloo&family=Fredoka+One&family=Syne:wght@800&family=Space+Grotesk:wght@700&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
