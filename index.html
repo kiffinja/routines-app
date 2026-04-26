@@ -5,18 +5,9 @@
 <meta name="theme-color" content="#1A1025">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Routines">
-<meta name="description" content="Créez vos routines et exécutez-les tâche par tâche.">
+<meta name="apple-mobile-web-app-title" content="Habits">
 <link rel="manifest" href="https://kiffinja.github.io/routines-app/manifest.json">
-<link rel="apple-touch-icon" href="https://kiffinja.github.io/routines-app/icon-192.png">
-<script>
-if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("https://kiffinja.github.io/routines-app/sw.js",{scope:"/"}).catch(()=>{});
-  });
-}
-</script>
+<script>if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("https://kiffinja.github.io/routines-app/sw.js").catch(()=>{}));</script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Routines</title>
@@ -136,11 +127,23 @@ textarea.finp{resize:vertical;min-height:68px}
 .cb:hover{transform:scale(1.05)}
 @keyframes popIn{0%{transform:scale(.55);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes up{0%{transform:translateY(18px);opacity:0}100%{transform:translateY(0);opacity:1}}
-::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-thumb{background:#c0b0e8;border-radius:3px}
+.day-btn{padding:.35rem .55rem;border-radius:8px;border:2px solid var(--border);background:#fff;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--ink-l);transition:all .15s}
+.day-btn.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.rc-alarm{margin-top:.4rem;display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--ink-l)}
+.rc-alarm-badge{background:var(--ink);color:#fff;border-radius:8px;padding:.2rem .5rem;font-size:.72rem;font-weight:600;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:.3rem}
+.rc-alarm-badge.soon{background:#FF3CAC;animation:pulse 1.5s infinite}
+.rc-alarm-badge.now{background:#FF1744;animation:pulse .7s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.65}}
+::-webkit-scrollbar{width:5px}[dir=rtl] .th{flex-direction:row-reverse}[dir=rtl] .rc-acts{left:.6rem;right:auto} ::-webkit-scrollbar-thumb{background:#c0b0e8;border-radius:3px}
 </style>
 </head>
 <body>
-<header><div class="logo">Routines<b>.</b></div></header>
+<div id="lang-screen" style="position:fixed;inset:0;background:#1A1025;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;overflow-y:auto">
+  <div style="font-family:Righteous,cursive;font-size:2.8rem;color:#fff;margin-bottom:.3rem">Habits<span style="color:#C8FF3E">.</span></div>
+  <div style="color:rgba(255,255,255,.5);font-size:.9rem;margin-bottom:2.5rem;text-align:center">Choose your language · Choisissez votre langue</div>
+  <div id="lang-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;width:100%;max-width:400px"></div>
+</div>
+<header><div class="logo">Habits<b>.</b></div><button id="lang-btn" onclick="showLangScreen()" style="background:rgba(255,255,255,.12);border:none;color:#fff;padding:.35rem .7rem;border-radius:8px;cursor:pointer;font-size:.85rem;margin-left:auto">🌐</button></header>
 <div class="main">
   <div class="ph">Mes routines</div>
   <div class="grid" id="grid"></div>
@@ -149,32 +152,65 @@ textarea.finp{resize:vertical;min-height:68px}
 <!-- MODAL -->
 <div class="ov hidden" id="ov">
   <div class="modal">
-    <div class="mh" id="mh">Nouvelle routine</div>
+    <div class="mh" id="mh">New routine</div>
     <div class="fg">
-      <span class="lb">Nom</span>
-      <input type="text" id="rn" class="finp" placeholder="Ex : Matin zen, Sport, Révision…">
+      <span class="lb" id="lbl-rname">Name</span>
+      <input type="text" id="rn" class="finp" placeholder="Ex: Morning zen, Sport…">
     </div>
     <div class="fg">
-      <span class="lb">Emoji de la routine</span>
+      <span class="lb" id="lbl-remoji">Routine emoji</span>
       <div id="re-wrap">
         <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
           <div id="re-display" style="width:52px;height:52px;border-radius:12px;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0">📋</div>
-          <input type="text" id="re" class="finp" maxlength="4" placeholder="📋" style="flex:1;font-size:1.2rem">
+          <input type="text" id="re" class="finp emoji-inp" maxlength="4" placeholder="📋" style="flex:1;font-size:1.2rem">
         </div>
-        <input type="text" id="re-search" class="finp" placeholder="🔍 Rechercher…" style="width:100%;font-size:.9rem;margin-bottom:.5rem">
+        <input type="text" id="re-search" class="finp" placeholder="🔍 Search…" style="width:100%;font-size:.9rem;margin-bottom:.5rem">
         <div id="re-catbar" style="display:flex;gap:.3rem;margin-bottom:.5rem;overflow-x:auto;padding-bottom:.2rem"></div>
         <div id="re-grid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:.25rem;max-height:130px;overflow-y:auto;padding:.1rem"></div>
       </div>
     </div>
     <div class="sep"></div>
+    <div class="fg" id="alarm-section">
+      <span class="lb">⏰ Alarm</span>
+      <label class="chk-lbl" style="margin-bottom:.6rem">
+        <input type="checkbox" id="alarm-on"> Enable an alarm for this routine
+      </label>
+      <div id="alarm-settings" style="display:none;background:var(--bg);border-radius:12px;padding:.9rem;display:none;flex-direction:column;gap:.8rem">
+        <!-- Time -->
+        <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
+          <span style="font-size:.82rem;color:var(--ink-l);min-width:60px">Time</span>
+          <input type="time" id="alarm-time" value="08:00" class="finp" style="width:130px">
+        </div>
+        <!-- Days -->
+        <div>
+          <div style="font-size:.82rem;color:var(--ink-l);margin-bottom:.4rem">Days</div>
+          <div style="display:flex;gap:.35rem;flex-wrap:wrap" id="alarm-days">
+            <button type="button" class="day-btn" data-d="1">Mon</button>
+            <button type="button" class="day-btn" data-d="2">Tue</button>
+            <button type="button" class="day-btn" data-d="3">Wed</button>
+            <button type="button" class="day-btn" data-d="4">Thu</button>
+            <button type="button" class="day-btn" data-d="5">Fri</button>
+            <button type="button" class="day-btn" data-d="6">Sat</button>
+            <button type="button" class="day-btn" data-d="0">Sun</button>
+          </div>
+        </div>
+        <!-- Show countdown X hours before -->
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+          <span style="font-size:.82rem;color:var(--ink-l)">Show countdown</span>
+          <input type="number" id="alarm-before" min="0" max="24" value="2" style="width:60px;padding:.35rem .5rem;border:2px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;text-align:center;outline:none">
+          <span style="font-size:.82rem;color:var(--ink-l)">hours before</span>
+        </div>
+      </div>
+    </div>
+    <div class="sep"></div>
     <div class="fg">
-      <span class="lb">Tâches</span>
+      <span class="lb" id="lbl-tasks">Tasks</span>
       <div class="tl" id="tl"></div>
-      <button class="add-btn" id="add-task-btn" style="border-radius:12px;padding:.9rem;margin-top:.3rem">＋ Ajouter une tâche</button>
+      <button class="add-btn" id="add-task-btn" style="border-radius:12px;padding:.9rem;margin-top:.3rem">＋ Add a task</button>
     </div>
     <div class="mfoot">
-      <button class="btn btn-g" id="cancel-btn">Annuler</button>
-      <button class="btn btn-p" id="save-btn">Enregistrer</button>
+      <button class="btn btn-g" id="cancel-btn">Cancel</button>
+      <button class="btn btn-p" id="save-btn">Save</button>
     </div>
   </div>
 </div>
@@ -224,18 +260,6 @@ const TPAL=[
   {h:'#FF1744',n:'Rouge'},{h:'#00B0FF',n:'Bleu ciel'},{h:'#C8FF3E',n:'Lime'},
   {h:'#FF6D9B',n:'Bubblegum'},{h:'#FF9100',n:'Mandarine'},{h:'#40C4FF',n:'Azur'},
 ];
-const EMOJI_CATS=[
-  {label:"😀",name:"Visages",emojis:["😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊","😋","😎","😍","🥰","😘","😗","😙","😚","🙂","🤗","🤩","🤔","🤨","😐","😑","😶","🙄","😏","😣","😥","😮","🤐","😯","😪","😫","🥱","😴","😌","😛","😜","😝","🤤","😒","😓","😔","😟","🙁","☹️","😕","😲","😷","🤒","🤕","🤢","🤮","🤧","🥵","🥶","🥴","😵","🤯","🤠","🥳","🥸","🤓","🧐","😭","😱","😨","😰","😢","😤","😠","😡","🤬","😈","👿","💀","☠️","💩","🤡","👹","👺","👻","👽","👾","🤖","😺","😸","😹","😻","😼","😽","🙀","😿","😾"]},
-  {label:"👋",name:"Gestes",emojis:["👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🤟","🤘","🤙","👈","👉","👆","👇","☝️","👍","👎","✊","👊","🤛","🤜","👏","🙌","🫶","👐","🤲","🤝","🙏","✍️","💅","🤳","💪","🦾","👂","👃","👀","👅","👄","🫦","👶","🧒","👦","👧","🧑","👱","👨","🧔","👩","🧓","👴","👵","🙍","🙎","🙅","🙆","💁","🙋","🧏","🙇","🤦","🤷","👮","🕵️","💂","🥷","👷","🫅","🤴","👸","👲","🧕","🤵","👰","🤰","🫄","🤱","👼","🎅","🤶","🧙","🧚","🧛","🧜","🧝","🧞","🧟","🧌","💆","💇","🚶","🧍","🧎","🏃","💃","🕺","🕴️","👯","🧖","🧗","🤺","🏇","⛷️","🏂","🪂","🏋️","🤼","🤸","⛹️","🤾","🏌️","🏄","🚣","🧘","🛀","🛌"]},
-  {label:"🐶",name:"Animaux",emojis:["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🪱","🐛","🦋","🐌","🐞","🐜","🦟","🦗","🪲","🐢","🐍","🦎","🦖","🦕","🐙","🦑","🦐","🦞","🦀","🐡","🐟","🐠","🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦍","🦧","🦣","🐘","🦛","🦏","🐪","🐫","🦒","🦘","🦬","🐃","🐂","🐄","🐎","🐖","🐏","🐑","🦙","🐐","🦌","🐕","🐩","🦮","🐈","🪶","🐓","🦃","🦤","🦚","🦜","🦢","🦩","🕊️","🐇","🦝","🦨","🦡","🦫","🦦","🦥","🐁","🐀","🐿️","🦔","🐾","🐉","🐲","🌵","🎄","🌲","🌳","🌴","🪵","🌱","🌿","☘️","🍀"]},
-  {label:"🍎",name:"Nourriture",emojis:["🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🫒","🥦","🥬","🥒","🌶️","🫑","🧄","🧅","🥕","🌽","🥔","🍠","🥐","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🧈","🥞","🧇","🥓","🥩","🍗","🍖","🌭","🍔","🍟","🍕","🫓","🥪","🥙","🧆","🌮","🌯","🫔","🥗","🥘","🫕","🥫","🍝","🍜","🍲","🍛","🍣","🍱","🥟","🦪","🍤","🍙","🍚","🍘","🍥","🥮","🍢","🧁","🍰","🎂","🍮","🍭","🍬","🍫","🍿","🍩","🍪","🌰","🥜","🍯","🧃","🥤","🧋","☕","🍵","🧉","🍺","🍻","🥂","🍷","🥃","🍸","🍹","🧊","🥄","🍴","🍽️","🥢","🧂","🫖","🍶","🍾"]},
-  {label:"🏠",name:"Maison",emojis:["🏠","🏡","🏢","🏣","🏤","🏥","🏦","🏨","🏩","🏪","🏫","🏬","🏭","🏯","🏰","💒","🗼","🗽","⛪","🕌","🛕","🕍","⛩️","🛏","🛋","🪑","🚽","🪠","🚿","🛁","🪤","🪒","🧴","🧷","🧹","🧺","🧻","🪣","🧼","🫧","🪥","🧽","🧯","🛒","🚪","🪞","🪟","🖼","🧸","🪆","🪅","💡","🔦","🕯","🪔","🧱","💈","🛢","🔑","🗝","🔐","🔒","🔓","🔧","🔨","⚒","🛠","🔩","🪛","🔬","🔭","🩺","💊","🩹","🩼","🧲","⚙️","🗜","⚖️","🔗","⛓","🪝","🛡","⚔️","🗡","🪓","⛏","🔪","📦","🪤","🧰","🗃","🗄","🗑","🖊","✏️","📝","📋","📌","📍","📎","✂️","🗂","📁","📂","🗓","📅","📆"]},
-  {label:"💪",name:"Sport",emojis:["⚽","🏀","🏈","⚾","🥎","🎾","🏐","🏉","🥏","🎱","🪀","🏓","🏸","🥅","⛳","🪁","🏹","🎣","🤿","🥊","🥋","🎽","🛹","🛼","🛷","⛸","🥌","🎿","⛷","🏂","🪂","🏋","🤼","🤸","⛹","🤺","🏇","🧘","🏄","🏊","🤽","🚣","🧗","🚵","🚴","🏆","🥇","🥈","🥉","🏅","🎖","🏵","🎗","🎫","🎟","🏁","🚩","🎌","🎪","🤹","🎭","🩰","🎨","🎬","🎤","🎧","🎼","🎵","🎶","🎹","🥁","🪘","🎷","🎺","🪗","🎸","🪕","🎻","🎲","♟","🎯","🎳","🎮","🎰","🧩"]},
-  {label:"📚",name:"Travail",emojis:["📱","💻","⌨️","🖥","🖨","🖱","🖲","💽","💾","💿","📀","🧮","📷","📸","📹","🎥","📽","🎞","📞","☎️","📟","📠","📺","📻","🧭","⏱","⏲","⏰","🕰","⌛","⏳","📡","🔋","🪫","🔌","💡","🔦","🕯","💸","💵","💴","💶","💷","🪙","💰","💳","💹","📈","📉","📊","📋","📌","📍","📎","🖇","📏","📐","✂️","🗃","🗄","🗑","🔒","🔓","🔏","🔐","🔑","🗝","🔨","🪓","⛏","⚒","🛠","🗡","⚔️","🛡","🔧","🪛","🔩","⚙️","🗜","⚖️","🦯","🔗","⛓","🪝","🧲","🔬","🔭","📡","💉","🩸","💊","🩹","🩼","🩺","📝","✏️","🖊","🖋","✒️","🖌","🖍","📓","📔","📒","📕","📗","📘","📙","📚","📖","🔖","🏷","🗞","📰","📄","📃","📑","📊","📋","📁","📂","🗂","🗞","📆","📅","🗒","🗓","📇"]},
-  {label:"🌿",name:"Nature",emojis:["🌱","🌿","☘️","🍀","🎋","🎍","🍃","🍂","🍁","🍄","🌾","💐","🌷","🌹","🥀","🌺","🌸","🌼","🌻","🌞","🌝","🌛","🌜","🌚","🌕","🌖","🌗","🌘","🌑","🌒","🌓","🌔","🌙","🌟","⭐","🌠","🌌","☀️","🌤","⛅","🌥","☁️","🌦","🌧","⛈","🌩","🌨","❄️","☃️","⛄","🌬","💨","💧","💦","🫧","🌊","🌀","🌈","🌂","⛱","⚡","🔥","💥","🌋","🏔","⛰","🗻","🏕","🏖","🏜","🏝","🏞","🌅","🌄","🌠","🌃","🌆","🌇","🌉","🦁","🐯","🦊","🐺","🦝","🐗","🦌","🐴","🦄","🐮","🐷","🐸","🌵","🎄","🌴","🌳","🌲","🪵","🌱","🪴","🪨","🌊","🌋","🏔","⛺"]},
-  {label:"✨",name:"Divers",emojis:["✨","💫","⭐","🌟","💥","🔥","❄️","🌊","💎","💍","👑","🏆","🥇","🎖","🎗","🎫","🎟","🎪","🎨","🖼","🎭","🎬","🎤","🎧","🎼","🎵","🎶","🎁","🎀","🎊","🎉","🪄","🎭","🛸","🚀","✈️","⛵","🚢","🚂","🏎","🚗","🛵","🚲","🛴","🛹","🛼","🪂","🪐","🌍","🌎","🌏","❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❤️‍🔥","💕","💞","💓","💗","💖","💘","💝","💟","☮️","✝️","☪️","🕉","☸️","✡️","🔯","☯️","🆕","🆒","🆓","🆗","🆙","✅","☑️","✔️","❎","💯","🔔","🔕","📣","📢","💬","💭","🗯","💤","🔇","🔈","🔉","🔊","📳","📴","📵","🚫","⛔","🛑","📛","❌","⭕","❓","❔","❕","❗","‼️","⁉️","🔅","🔆","📶","🛜"]}
-];
-
 const FONTS=[
   {cls:'ff1',fam:"'Righteous',cursive",label:'Righteous',s:'Rr'},
   {cls:'ff2',fam:"'Boogaloo',cursive",label:'Boogaloo',s:'Bb'},
@@ -259,7 +283,16 @@ document.getElementById('skip-btn').addEventListener('click',()=>nextTask(true))
 document.getElementById('run-close').addEventListener('click',exitRun);
 document.getElementById('back-btn').addEventListener('click',exitComplete);
 
-// ── RENDER ───────────────────────────────────────────
+// ── ALARM TOGGLE ────────────────────────────────────
+document.getElementById('alarm-on').addEventListener('change', function() {
+  document.getElementById('alarm-settings').style.display = this.checked ? 'flex' : 'none';
+});
+document.getElementById('alarm-days').addEventListener('click', e => {
+  const btn = e.target.closest('.day-btn');
+  if(btn) btn.classList.toggle('on');
+});
+
+
 function render(){
   const g=document.getElementById('grid');
   g.innerHTML='';
@@ -304,41 +337,70 @@ function render(){
       const name=document.createElement('div');
       name.className='rc-name'; name.textContent=r.name;
       const meta=document.createElement('div');
-      meta.className='rc-meta'; meta.textContent=r.tasks.length+' tâche'+(r.tasks.length!==1?'s':'');
+      meta.className='rc-meta'; meta.textContent=r.tasks.length+' '+(r.tasks.length!==1?(T.n_tasks_pl||'tasks'):(T.n_tasks||'task'));
       const playBtn=document.createElement('button');
-      playBtn.className='play'; playBtn.textContent='▶ Lancer';
+      playBtn.className='play'; playBtn.textContent=T.launch||'▶ Launch';
       playBtn.addEventListener('click',()=>startRoutine(i));
       body.append(name,meta,playBtn);
+
+      // Alarm countdown badge
+      if(r.alarm&&r.alarm.on){
+        const alarmRow=document.createElement('div');
+        alarmRow.className='rc-alarm';
+        alarmRow.id='alarm-row-'+i;
+        body.appendChild(alarmRow);
+        updateAlarmBadge(r,i);
+      }
 
       card.append(ban,body);
       g.appendChild(card);
     });
   }
   const addBtn=document.createElement('button');
-  addBtn.className='add-btn'; addBtn.innerHTML='＋ &nbsp;Créer une routine';
+  addBtn.className='add-btn'; addBtn.innerHTML='＋ &nbsp;'+(T.create||'Create a routine');
   addBtn.addEventListener('click',openNew);
   g.appendChild(addBtn);
 }
 
 // ── MODAL ────────────────────────────────────────────
+function resetAlarmUI(alarm){
+  const a=alarm||{};
+  document.getElementById('alarm-on').checked=!!a.on;
+  document.getElementById('alarm-settings').style.display=a.on?'flex':'none';
+  document.getElementById('alarm-time').value=a.time||'08:00';
+  document.getElementById('alarm-before').value=a.before||2;
+  document.querySelectorAll('.day-btn').forEach(b=>{
+    b.classList.toggle('on',(a.days||[]).includes(+b.dataset.d));
+  });
+}
+function readAlarmUI(){
+  const on=document.getElementById('alarm-on').checked;
+  if(!on) return {on:false};
+  const time=document.getElementById('alarm-time').value||'08:00';
+  const before=parseInt(document.getElementById('alarm-before').value)||2;
+  const days=[...document.querySelectorAll('.day-btn.on')].map(b=>+b.dataset.d);
+  return {on,time,before,days};
+}
 function openNew(){
   editId=null;
-  document.getElementById('mh').textContent='Nouvelle routine';
+  document.getElementById('mh').textContent=T.new_routine||'New routine';
   document.getElementById('rn').value='';
   document.getElementById('re').value='📋';
-  document.getElementById('re-display').textContent='📋';
+  const red=document.getElementById('re-display'); if(red) red.textContent='📋';
   document.getElementById('tl').innerHTML='';
+  resetAlarmUI({});
   document.getElementById('ov').classList.remove('hidden');
 }
 function openEdit(i){
   editId=i;
   const r=routines[i];
-  document.getElementById('mh').textContent='Modifier la routine';
+  document.getElementById('mh').textContent=T.edit_routine||'Edit routine';
   document.getElementById('rn').value=r.name;
   document.getElementById('re').value=r.emoji||'📋';
-  document.getElementById('re-display').textContent=r.emoji||'📋';
+  const red=document.getElementById('re-display'); if(red) red.textContent=r.emoji||'📋';
   document.getElementById('tl').innerHTML='';
   r.tasks.forEach(t=>addTask(t));
+  resetAlarmUI(r.alarm||{});
   document.getElementById('ov').classList.remove('hidden');
 }
 function closeModal(){document.getElementById('ov').classList.add('hidden')}
@@ -400,14 +462,14 @@ function addTask(t){
 
   // Title input
   const titleInp=document.createElement('input');
-  titleInp.type='text'; titleInp.className='finp'; titleInp.placeholder='Nom de la tâche'; titleInp.value=d.title||'';
-  titleInp.addEventListener('input',()=>{ prev.textContent=titleInp.value||'Nouvelle tâche'; });
-  body.appendChild(mkFG('Titre',titleInp));
+  titleInp.type='text'; titleInp.className='finp'; titleInp.placeholder=T.task_title||'Task title'; titleInp.value=d.title||'';
+  titleInp.addEventListener('input',()=>{ prev.textContent=titleInp.value||(T.new_task||'New task'); });
+  body.appendChild(mkFG(T.task_title||'Title',titleInp));
 
   // Desc
   const descInp=document.createElement('textarea');
-  descInp.className='finp'; descInp.placeholder='Détaillez la tâche…'; descInp.value=d.desc||'';
-  body.appendChild(mkFG('Description',descInp));
+  descInp.className='finp'; descInp.placeholder=T.task_desc||'Details…'; descInp.value=d.desc||'';
+  body.appendChild(mkFG(T.task_desc||'Description',descInp));
 
   // Emoji picker
   const emojiWrap=document.createElement('div');
@@ -420,7 +482,7 @@ function addTask(t){
   emojiDisplay.textContent=d.emoji||'✨';
   const emojiInp=document.createElement('input');
   emojiInp.type='text'; emojiInp.className='finp emoji-inp'; emojiInp.maxLength=4; emojiInp.value=d.emoji||'✨';
-  emojiInp.placeholder='ou tapez…';
+  emojiInp.placeholder=T.task_emoji||'Emoji';
   emojiInp.style.cssText='flex:1;font-size:1.2rem';
   emojiInp.addEventListener('input',()=>{
     const v=emojiInp.value||'✨';
@@ -445,6 +507,17 @@ function addTask(t){
   const grid=document.createElement('div');
   grid.style.cssText='display:grid;grid-template-columns:repeat(8,1fr);gap:.25rem;max-height:140px;overflow-y:auto;padding:.1rem';
 
+  // Picker container — hidden by default, toggles on click
+  const pickerWrap=document.createElement('div');
+  pickerWrap.style.display='none';
+  pickerWrap.append(catBar,grid);
+
+  emojiDisplay.style.cursor='pointer';
+  emojiDisplay.title='Choisir un emoji';
+  emojiDisplay.addEventListener('click',()=>{
+    pickerWrap.style.display=pickerWrap.style.display==='none'?'block':'none';
+  });
+
   function showCat(idx){
     catBar.querySelectorAll('.ecat').forEach((b,i)=>b.style.background=i===idx?'var(--acc-l)':'var(--bg)');
     grid.innerHTML='';
@@ -457,6 +530,7 @@ function addTask(t){
       btn.addEventListener('mouseleave',()=>btn.style.background='none');
       btn.addEventListener('click',()=>{
         emojiInp.value=em; emojiSpan.textContent=em; emojiDisplay.textContent=em;
+        pickerWrap.style.display='none'; // close after selection
       });
       grid.appendChild(btn);
     });
@@ -472,8 +546,8 @@ function addTask(t){
   });
   showCat(0);
 
-  emojiWrap.append(emojiTop,catBar,grid);
-  body.appendChild(mkFG('Emoji',emojiWrap));
+  emojiWrap.append(emojiTop,pickerWrap);
+  body.appendChild(mkFG(T.task_emoji||'Emoji',emojiWrap));
 
 
   // Color swatches
@@ -490,7 +564,7 @@ function addTask(t){
     });
     tcRow.appendChild(sw);
   });
-  body.appendChild(mkFG('Couleur de fond',tcRow));
+  body.appendChild(mkFG(T.task_color||'Background color',tcRow));
 
   // Font pills
   const fgrid=document.createElement('div'); fgrid.className='fgrid';
@@ -508,21 +582,21 @@ function addTask(t){
   });
   const italLbl=document.createElement('label'); italLbl.className='chk-lbl'; italLbl.style.marginTop='.5rem';
   const italCb=document.createElement('input'); italCb.type='checkbox'; italCb.checked=!!d.italic;
-  italLbl.append(italCb,' Italique');
-  const fontFG=mkFG('Typographie',fgrid); fontFG.appendChild(italLbl);
+  italLbl.append(italCb,' '+(T.task_italic||'Italic'));
+  const fontFG=mkFG(T.task_font||'Font',fgrid); fontFG.appendChild(italLbl);
   body.appendChild(fontFG);
 
   // Timer
   const timerLbl=document.createElement('label'); timerLbl.className='chk-lbl';
   const timerCb=document.createElement('input'); timerCb.type='checkbox'; timerCb.checked=!!d.timer;
-  timerLbl.append(timerCb,' Activer un chrono');
+  timerLbl.append(timerCb,' '+(T.task_timer_on||'Enable a timer'));
   const durRow=document.createElement('div'); durRow.className='dur-row';
   durRow.style.display=d.timer?'flex':'none';
   const durInp=document.createElement('input'); durInp.type='number'; durInp.min=1; durInp.max=99; durInp.value=d.timerMin||5;
-  const durSpan=document.createElement('span'); durSpan.textContent='minutes';
+  const durSpan=document.createElement('span'); durSpan.textContent=T.task_minutes||'minutes';
   durRow.append(durInp,durSpan);
   timerCb.addEventListener('change',()=>{ durRow.style.display=timerCb.checked?'flex':'none'; });
-  const timerFG=mkFG('Chronomètre',timerLbl); timerFG.appendChild(durRow);
+  const timerFG=mkFG(T.task_timer||'Timer',timerLbl); timerFG.appendChild(durRow);
   body.appendChild(timerFG);
 
   item.append(hdr,body);
@@ -578,7 +652,8 @@ function saveRoutine(){
     if(title) tasks.push({title,desc,emoji:emojiVal,color,font,fontFam,italic,timer,timerMin});
   });
   if(!tasks.length){alert('Ajoutez au moins une tâche !');return;}
-  const r={name,emoji,tasks};
+  const alarm=readAlarmUI();
+  const r={name,emoji,tasks,alarm};
   if(editId!==null) routines[editId]=r; else routines.push(r);
   save(); closeModal(); render();
 }
@@ -649,7 +724,9 @@ function nextTask(skip){
 function exitRun(){clearTimer();document.getElementById('run').classList.add('hidden');document.body.style.overflow='';}
 function showComplete(){
   document.getElementById('run').classList.add('hidden');
-  document.getElementById('cs').textContent='"'+CUR.name+'" · '+CUR.tasks.length+' tâche'+(CUR.tasks.length>1?'s':'')+' accomplie'+(CUR.tasks.length>1?'s':'')+' !';
+  const n=CUR.tasks.length;
+  const taskWord=n>1?(T.n_tasks_pl||'tasks'):(T.n_tasks||'task');
+  document.getElementById('cs').textContent='"'+CUR.name+'" · '+n+' '+taskWord+' '+(T.tasks_done||'completed!');
   document.getElementById('cmplt').classList.remove('hidden');
 }
 function exitComplete(){document.getElementById('cmplt').classList.add('hidden');document.body.style.overflow='';}
@@ -695,50 +772,277 @@ function demo(){
   save();
 }
 
+// ── ALARM ENGINE ─────────────────────────────────────
+function getNextAlarm(alarm) {
+  // Returns ms until next alarm trigger, or null if not applicable
+  if(!alarm||!alarm.on||!alarm.days||!alarm.days.length) return null;
+  const now = new Date();
+  const [h,m] = (alarm.time||'08:00').split(':').map(Number);
+  // Check next 7 days
+  for(let d=0;d<8;d++){
+    const target = new Date(now);
+    target.setDate(now.getDate()+d);
+    target.setHours(h,m,0,0);
+    if(target>now && alarm.days.includes(target.getDay())){
+      return target.getTime()-now.getTime(); // ms until alarm
+    }
+  }
+  return null;
+}
+
+function updateAlarmBadge(r,i){
+  const el=document.getElementById('alarm-row-'+i);
+  if(!el) return;
+  el.innerHTML='';
+  const ms=getNextAlarm(r.alarm);
+  if(ms===null) return;
+  const beforeMs=(r.alarm.before||2)*3600*1000;
+  if(ms>beforeMs) {
+    // Show scheduled time only
+    const [h,m]=r.alarm.time.split(':');
+    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const dayLabels=r.alarm.days.map(d=>days[d]).join(', ');
+    el.innerHTML='<span style="font-size:.75rem;color:var(--ink-l)">⏰ '+r.alarm.time+' · '+dayLabels+'</span>';
+    return;
+  }
+  // Within countdown window — show countdown badge
+  const pct = ms / beforeMs; // 1.0 = just started, 0.0 = now
+  let badgeColor, pulse = false;
+  if(pct > 0.5)       { badgeColor='#00C853'; }       // green — more than half left
+  else if(pct > 0.1)  { badgeColor='#FF9100'; }       // orange — between 10% and 50%
+  else                { badgeColor='#FF1744'; pulse=true; } // red + pulse — last 10%
+
+  const badge=document.createElement('div');
+  badge.style.cssText=`display:inline-flex;align-items:center;gap:.35rem;background:${badgeColor};color:#fff;border-radius:8px;padding:.2rem .55rem;font-size:.72rem;font-weight:700;font-family:'Space Grotesk',sans-serif;${pulse?'animation:pulse 1s infinite':''}`;
+  const totalSec=Math.floor(ms/1000);
+  const hh=Math.floor(totalSec/3600);
+  const mm=Math.floor((totalSec%3600)/60);
+  const ss=totalSec%60;
+  const fmt=hh>0?hh+'h '+String(mm).padStart(2,'0')+'m':String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+  badge.textContent='⏰ '+fmt;
+  el.appendChild(badge);
+}
+
+// Global ticker — updates all alarm badges every second
+setInterval(()=>{
+  routines.forEach((r,i)=>{
+    if(r.alarm&&r.alarm.on&&document.getElementById('alarm-row-'+i)){
+      updateAlarmBadge(r,i);
+    }
+  });
+},1000);
+
+// Alarm sound notification
+function checkAlarmFire(){
+  routines.forEach((r,i)=>{
+    if(!r.alarm||!r.alarm.on) return;
+    const ms=getNextAlarm(r.alarm);
+    if(ms!==null&&ms<2000&&ms>0){
+      // Fire alarm!
+      try{
+        const ctx=new(window.AudioContext||window.webkitAudioContext)();
+        [523,659,784].forEach((freq,j)=>{
+          const osc=ctx.createOscillator();
+          const gain=ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value=freq;
+          osc.type='sine';
+          gain.gain.setValueAtTime(0.3,ctx.currentTime+j*0.15);
+          gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+j*0.15+0.4);
+          osc.start(ctx.currentTime+j*0.15);
+          osc.stop(ctx.currentTime+j*0.15+0.4);
+        });
+      } catch(e){}
+      // Pulse the card
+      const card=document.querySelector('.rc:nth-child('+(i+1)+')');
+      if(card){card.style.boxShadow='0 0 0 4px #FF3CAC';setTimeout(()=>card.style.boxShadow='',3000);}
+    }
+  });
+}
+setInterval(checkAlarmFire,1000);
+
+demo();
+
+// ════════════════════════════════════════
+// i18n SYSTEM
+// ════════════════════════════════════════
+const LANGS={"en": {"name": "English", "flag": "🇬🇧", "dir": "ltr", "translations": {"my_routines": "My routines", "create": "Create a routine", "new_routine": "New routine", "edit_routine": "Edit routine", "routine_name": "Name", "routine_emoji": "Routine emoji", "tasks": "Tasks", "add_task": "＋ Add a task", "cancel": "Cancel", "save": "Save", "task_title": "Task title", "task_desc": "Description", "task_emoji": "Emoji", "task_color": "Background color", "task_font": "Font", "task_italic": "Italic", "task_timer": "Timer", "task_timer_on": "Enable a timer", "task_minutes": "minutes", "done": "✓ Done!", "skip": "Skip", "congrats": "Well done!", "tasks_done": "task(s) completed!", "back": "Back to routines", "empty": "No routines yet.\nCreate one!", "delete_confirm": "Delete", "n_tasks": "task", "n_tasks_pl": "tasks", "launch": "▶ Launch", "search_emoji": "🔍 Search…", "chrono": "timer", "no_routines": "No routines.", "create_one": "Create one!"}}, "fr": {"name": "Français", "flag": "🇫🇷", "dir": "ltr", "translations": {"my_routines": "Mes routines", "create": "Créer une routine", "new_routine": "Nouvelle routine", "edit_routine": "Modifier la routine", "routine_name": "Nom", "routine_emoji": "Emoji de la routine", "tasks": "Tâches", "add_task": "＋ Ajouter une tâche", "cancel": "Annuler", "save": "Enregistrer", "task_title": "Titre de la tâche", "task_desc": "Description", "task_emoji": "Emoji", "task_color": "Couleur de fond", "task_font": "Typographie", "task_italic": "Italique", "task_timer": "Chronomètre", "task_timer_on": "Activer un chrono", "task_minutes": "minutes", "done": "✓ C'est fait !", "skip": "Passer", "congrats": "Bravo !", "tasks_done": "tâche(s) accomplie(s) !", "back": "Retour aux routines", "empty": "Aucune routine.\nCréez-en une !", "delete_confirm": "Supprimer", "n_tasks": "tâche", "n_tasks_pl": "tâches", "launch": "▶ Lancer", "search_emoji": "🔍 Rechercher…", "chrono": "chrono", "no_routines": "Aucune routine.", "create_one": "Créez-en une !"}}, "es": {"name": "Español", "flag": "🇪🇸", "dir": "ltr", "translations": {"my_routines": "Mis rutinas", "create": "Crear rutina", "new_routine": "Nueva rutina", "edit_routine": "Editar rutina", "routine_name": "Nombre", "routine_emoji": "Emoji rutina", "tasks": "Tareas", "add_task": "＋ Añadir tarea", "cancel": "Cancelar", "save": "Guardar", "task_title": "Título", "task_desc": "Descripción", "task_emoji": "Emoji", "task_color": "Color de fondo", "task_font": "Tipografía", "task_italic": "Cursiva", "task_timer": "Cronómetro", "task_timer_on": "Activar cronómetro", "task_minutes": "minutos", "done": "✓ ¡Hecho!", "skip": "Saltar", "congrats": "¡Bravo!", "tasks_done": "tarea(s) completada(s)", "back": "Volver", "empty": "Sin rutinas.\n¡Crea una!", "delete_confirm": "Eliminar", "n_tasks": "tarea", "n_tasks_pl": "tareas", "launch": "▶ Iniciar", "search_emoji": "🔍 Buscar…", "chrono": "crono", "no_routines": "Sin rutinas.", "create_one": "¡Crea una!"}}, "de": {"name": "Deutsch", "flag": "🇩🇪", "dir": "ltr", "translations": {"my_routines": "Meine Routinen", "create": "Routine erstellen", "new_routine": "Neue Routine", "edit_routine": "Routine bearbeiten", "routine_name": "Name", "routine_emoji": "Routine-Emoji", "tasks": "Aufgaben", "add_task": "＋ Aufgabe hinzufügen", "cancel": "Abbrechen", "save": "Speichern", "task_title": "Aufgabentitel", "task_desc": "Beschreibung", "task_emoji": "Emoji", "task_color": "Hintergrundfarbe", "task_font": "Schriftart", "task_italic": "Kursiv", "task_timer": "Timer", "task_timer_on": "Timer aktivieren", "task_minutes": "Minuten", "done": "✓ Fertig!", "skip": "Überspringen", "congrats": "Bravo!", "tasks_done": "Aufgabe(n) erledigt!", "back": "Zurück", "empty": "Keine Routinen.\nErstelle eine!", "delete_confirm": "Löschen", "n_tasks": "Aufgabe", "n_tasks_pl": "Aufgaben", "launch": "▶ Starten", "search_emoji": "🔍 Suchen…", "chrono": "Timer", "no_routines": "Keine Routinen.", "create_one": "Erstelle eine!"}}, "it": {"name": "Italiano", "flag": "🇮🇹", "dir": "ltr", "translations": {"my_routines": "Le mie routine", "create": "Crea routine", "new_routine": "Nuova routine", "edit_routine": "Modifica routine", "routine_name": "Nome", "routine_emoji": "Emoji routine", "tasks": "Attività", "add_task": "＋ Aggiungi attività", "cancel": "Annulla", "save": "Salva", "task_title": "Titolo attività", "task_desc": "Descrizione", "task_emoji": "Emoji", "task_color": "Colore sfondo", "task_font": "Tipografia", "task_italic": "Corsivo", "task_timer": "Timer", "task_timer_on": "Attiva timer", "task_minutes": "minuti", "done": "✓ Fatto!", "skip": "Salta", "congrats": "Bravo!", "tasks_done": "attività completata/e!", "back": "Torna", "empty": "Nessuna routine.\nCreane una!", "delete_confirm": "Elimina", "n_tasks": "attività", "n_tasks_pl": "attività", "launch": "▶ Avvia", "search_emoji": "🔍 Cerca…", "chrono": "timer", "no_routines": "Nessuna routine.", "create_one": "Creane una!"}}, "pt": {"name": "Português", "flag": "🇵🇹", "dir": "ltr", "translations": {"my_routines": "Minhas rotinas", "create": "Criar rotina", "new_routine": "Nova rotina", "edit_routine": "Editar rotina", "routine_name": "Nome", "routine_emoji": "Emoji da rotina", "tasks": "Tarefas", "add_task": "＋ Adicionar tarefa", "cancel": "Cancelar", "save": "Guardar", "task_title": "Título da tarefa", "task_desc": "Descrição", "task_emoji": "Emoji", "task_color": "Cor de fundo", "task_font": "Tipografia", "task_italic": "Itálico", "task_timer": "Cronómetro", "task_timer_on": "Ativar cronómetro", "task_minutes": "minutos", "done": "✓ Feito!", "skip": "Saltar", "congrats": "Parabéns!", "tasks_done": "tarefa(s) concluída(s)!", "back": "Voltar", "empty": "Sem rotinas.\nCrie uma!", "delete_confirm": "Eliminar", "n_tasks": "tarefa", "n_tasks_pl": "tarefas", "launch": "▶ Iniciar", "search_emoji": "🔍 Pesquisar…", "chrono": "crono", "no_routines": "Sem rotinas.", "create_one": "Crie uma!"}}, "nl": {"name": "Nederlands", "flag": "🇳🇱", "dir": "ltr", "translations": {"my_routines": "Mijn routines", "create": "Routine maken", "new_routine": "Nieuwe routine", "edit_routine": "Routine bewerken", "routine_name": "Naam", "routine_emoji": "Routine-emoji", "tasks": "Taken", "add_task": "＋ Taak toevoegen", "cancel": "Annuleren", "save": "Opslaan", "task_title": "Taaknaam", "task_desc": "Omschrijving", "task_emoji": "Emoji", "task_color": "Achtergrondkleur", "task_font": "Lettertype", "task_italic": "Cursief", "task_timer": "Timer", "task_timer_on": "Timer inschakelen", "task_minutes": "minuten", "done": "✓ Klaar!", "skip": "Overslaan", "congrats": "Geweldig!", "tasks_done": "taak/taken voltooid!", "back": "Terug", "empty": "Geen routines.\nMaak er een!", "delete_confirm": "Verwijderen", "n_tasks": "taak", "n_tasks_pl": "taken", "launch": "▶ Starten", "search_emoji": "🔍 Zoeken…", "chrono": "timer", "no_routines": "Geen routines.", "create_one": "Maak er een!"}}, "zh": {"name": "中文", "flag": "🇨🇳", "dir": "ltr", "translations": {"my_routines": "我的日程", "create": "创建日程", "new_routine": "新建日程", "edit_routine": "编辑日程", "routine_name": "名称", "routine_emoji": "日程表情", "tasks": "任务", "add_task": "＋ 添加任务", "cancel": "取消", "save": "保存", "task_title": "任务标题", "task_desc": "说明", "task_emoji": "表情", "task_color": "背景颜色", "task_font": "字体", "task_italic": "斜体", "task_timer": "计时器", "task_timer_on": "启用计时器", "task_minutes": "分钟", "done": "✓ 完成！", "skip": "跳过", "congrats": "太棒了！", "tasks_done": "任务已完成！", "back": "返回", "empty": "暂无日程\n创建一个吧！", "delete_confirm": "删除", "n_tasks": "任务", "n_tasks_pl": "任务", "launch": "▶ 开始", "search_emoji": "🔍 搜索…", "chrono": "计时", "no_routines": "暂无日程", "create_one": "创建一个吧！"}}, "ko": {"name": "한국어", "flag": "🇰🇷", "dir": "ltr", "translations": {"my_routines": "내 루틴", "create": "루틴 만들기", "new_routine": "새 루틴", "edit_routine": "루틴 수정", "routine_name": "이름", "routine_emoji": "루틴 이모지", "tasks": "할 일", "add_task": "＋ 할 일 추가", "cancel": "취소", "save": "저장", "task_title": "할 일 제목", "task_desc": "설명", "task_emoji": "이모지", "task_color": "배경 색상", "task_font": "폰트", "task_italic": "기울임", "task_timer": "타이머", "task_timer_on": "타이머 활성화", "task_minutes": "분", "done": "✓ 완료!", "skip": "건너뛰기", "congrats": "잘했어요!", "tasks_done": "할 일 완료!", "back": "루틴으로 돌아가기", "empty": "루틴이 없습니다\n만들어보세요!", "delete_confirm": "삭제", "n_tasks": "개", "n_tasks_pl": "개", "launch": "▶ 시작", "search_emoji": "🔍 검색…", "chrono": "타이머", "no_routines": "루틴이 없습니다", "create_one": "만들어보세요!"}}, "th": {"name": "ไทย", "flag": "🇹🇭", "dir": "ltr", "translations": {"my_routines": "กิจวัตรของฉัน", "create": "สร้างกิจวัตร", "new_routine": "กิจวัตรใหม่", "edit_routine": "แก้ไขกิจวัตร", "routine_name": "ชื่อ", "routine_emoji": "อีโมจิ", "tasks": "งาน", "add_task": "＋ เพิ่มงาน", "cancel": "ยกเลิก", "save": "บันทึก", "task_title": "ชื่องาน", "task_desc": "คำอธิบาย", "task_emoji": "อีโมจิ", "task_color": "สีพื้นหลัง", "task_font": "แบบอักษร", "task_italic": "ตัวเอียง", "task_timer": "ตัวจับเวลา", "task_timer_on": "เปิดใช้ตัวจับเวลา", "task_minutes": "นาที", "done": "✓ เสร็จแล้ว!", "skip": "ข้าม", "congrats": "เยี่ยมมาก!", "tasks_done": "งานเสร็จแล้ว!", "back": "กลับ", "empty": "ยังไม่มีกิจวัตร\nสร้างเลย!", "delete_confirm": "ลบ", "n_tasks": "งาน", "n_tasks_pl": "งาน", "launch": "▶ เริ่ม", "search_emoji": "🔍 ค้นหา…", "chrono": "จับเวลา", "no_routines": "ยังไม่มีกิจวัตร", "create_one": "สร้างเลย!"}}, "hi": {"name": "हिन्दी", "flag": "🇮🇳", "dir": "ltr", "translations": {"my_routines": "मेरी दिनचर्या", "create": "दिनचर्या बनाएं", "new_routine": "नई दिनचर्या", "edit_routine": "दिनचर्या संपादित करें", "routine_name": "नाम", "routine_emoji": "इमोजी", "tasks": "कार्य", "add_task": "＋ कार्य जोड़ें", "cancel": "रद्द करें", "save": "सहेजें", "task_title": "कार्य शीर्षक", "task_desc": "विवरण", "task_emoji": "इमोजी", "task_color": "पृष्ठभूमि रंग", "task_font": "फ़ॉन्ट", "task_italic": "तिरछा", "task_timer": "टाइमर", "task_timer_on": "टाइमर सक्रिय करें", "task_minutes": "मिनट", "done": "✓ हो गया!", "skip": "छोड़ें", "congrats": "शाबाश!", "tasks_done": "कार्य पूर्ण!", "back": "वापस जाएं", "empty": "कोई दिनचर्या नहीं\nबनाएं!", "delete_confirm": "हटाएं", "n_tasks": "कार्य", "n_tasks_pl": "कार्य", "launch": "▶ शुरू", "search_emoji": "🔍 खोजें…", "chrono": "टाइमर", "no_routines": "कोई दिनचर्या नहीं", "create_one": "बनाएं!"}}, "ar": {"name": "العربية", "flag": "🇸🇦", "dir": "rtl", "translations": {"my_routines": "روتيناتي", "create": "إنشاء روتين", "new_routine": "روتين جديد", "edit_routine": "تعديل الروتين", "routine_name": "الاسم", "routine_emoji": "إيموجي الروتين", "tasks": "المهام", "add_task": "＋ إضافة مهمة", "cancel": "إلغاء", "save": "حفظ", "task_title": "عنوان المهمة", "task_desc": "الوصف", "task_emoji": "إيموجي", "task_color": "لون الخلفية", "task_font": "الخط", "task_italic": "مائل", "task_timer": "مؤقت", "task_timer_on": "تفعيل المؤقت", "task_minutes": "دقائق", "done": "✓ تم!", "skip": "تخطي", "congrats": "أحسنت!", "tasks_done": "مهمة مكتملة!", "back": "رجوع", "empty": "لا يوجد روتين\nأنشئ واحداً!", "delete_confirm": "حذف", "n_tasks": "مهمة", "n_tasks_pl": "مهام", "launch": "▶ ابدأ", "search_emoji": "🔍 بحث…", "chrono": "مؤقت", "no_routines": "لا يوجد روتين", "create_one": "أنشئ واحداً!"}}};
+
+let T = {}; // current translations — starts empty, filled by setLang()
+
+function setLang(code) {
+  const lang = LANGS[code] || LANGS['en'];
+  T = lang.translations;
+  localStorage.setItem('habits_lang', code);
+  document.documentElement.lang = code;
+  document.documentElement.dir = lang.dir || 'ltr';
+  document.getElementById('lang-screen').style.display = 'none';
+  // Update static button labels
+  const addTaskBtn = document.getElementById('add-task-btn');
+  if(addTaskBtn) addTaskBtn.textContent = T.add_task || '+ Add a task';
+  const cancelBtn = document.getElementById('cancel-btn');
+  if(cancelBtn) cancelBtn.textContent = T.cancel || 'Cancel';
+  const saveBtn = document.getElementById('save-btn');
+  if(saveBtn) saveBtn.textContent = T.save || 'Save';
+  const doneBtn = document.getElementById('done-btn');
+  if(doneBtn) doneBtn.textContent = T.done || '✓ Done!';
+  const skipBtn = document.getElementById('skip-btn');
+  if(skipBtn) skipBtn.textContent = T.skip || 'Skip';
+  const backBtn = document.getElementById('back-btn');
+  if(backBtn) backBtn.textContent = T.back || 'Back';
+  // Modal static labels
+  const lblRname = document.getElementById('lbl-rname');
+  if(lblRname) lblRname.textContent = T.routine_name || 'Name';
+  const lblRemoji = document.getElementById('lbl-remoji');
+  if(lblRemoji) lblRemoji.textContent = T.routine_emoji || 'Routine emoji';
+  const lblTasks = document.getElementById('lbl-tasks');
+  if(lblTasks) lblTasks.textContent = T.tasks || 'Tasks';
+  render();
+}
+
+function showLangScreen() {
+  const screen = document.getElementById('lang-screen');
+  screen.style.display = 'flex';
+  const grid = document.getElementById('lang-grid');
+  if(grid.children.length > 0) return; // already built
+  Object.entries(LANGS).forEach(([code, lang]) => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);border-radius:14px;padding:.75rem .5rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.35rem;transition:all .18s;font-family:DM Sans,sans-serif;';
+    const flag = document.createElement('span');
+    flag.style.fontSize = '1.6rem';
+    flag.textContent = lang.flag;
+    const name = document.createElement('span');
+    name.style.cssText = 'font-size:.75rem;font-weight:500;color:#fff';
+    name.textContent = lang.name;
+    btn.append(flag, name);
+    btn.addEventListener('mouseover', () => btn.style.background = 'rgba(124,58,255,.5)');
+    btn.addEventListener('mouseout',  () => btn.style.background = 'rgba(255,255,255,.08)');
+    btn.addEventListener('click', () => setLang(code));
+    grid.appendChild(btn);
+  });
+}
+
+// ── PATCH render() to use T ──
+const _origRender = render;
+render = function() {
+  _origRender();
+  // Update heading and add button text after render
+  const ph = document.querySelector('.ph');
+  if(ph) ph.textContent = T.my_routines || 'My routines';
+  const addBtn = document.querySelector('.add-btn');
+  if(addBtn) addBtn.innerHTML = '＋ &nbsp;' + (T.create || 'Create a routine');
+  // Update modal labels
+  document.querySelectorAll('.play').forEach(b => b.textContent = T.launch || '▶ Launch');
+};
+
+// ── PATCH showComplete ──
+const _origShowComplete = showComplete;
+showComplete = function() {
+  _origShowComplete();
+  const ct = document.querySelector('.ct');
+  if(ct) ct.textContent = T.congrats || 'Well done!';
+  const backBtn = document.getElementById('back-btn');
+  if(backBtn) backBtn.textContent = T.back || 'Back';
+};
 
 // ── ROUTINE EMOJI PICKER ──────────────────────────────
-(function(){
-  const inp=document.getElementById('re');
-  const display=document.getElementById('re-display');
-  const catBar=document.getElementById('re-catbar');
-  const grid=document.getElementById('re-grid');
-  const search=document.getElementById('re-search');
+(function initREPicker(){
+  const inp    = document.getElementById('re');
+  const display= document.getElementById('re-display');
+  const catBar = document.getElementById('re-catbar');
+  const grid   = document.getElementById('re-grid');
+  const search = document.getElementById('re-search');
   if(!inp||!catBar||!grid) return;
-  let activeCatR=0;
-  function addEmojiBtn(em){
+  let activeCat=0;
+
+  // Reuse EMOJI_CATS from addTask scope — build a flat list
+  const ECAT=[
+    {l:'😀',e:['😀','😂','🥰','😎','🤩','😴','🤔','😅','🥳','😇','🤗','😤','🥺','😜','🤯','😱','🤖','👻','💀','😈','🤡','👾','😺','😸']},
+    {l:'🏠',e:['🏠','🛏','🛁','🚿','🪣','🧹','🧽','🧴','🪥','🧺','🪟','🚪','🛋','🪑','🖼','💡','🕯','🧸','🪴','🗑','🧱','🔑','🛒','🪞']},
+    {l:'🍎',e:['🍎','🥑','🥗','🍳','☕','🍵','🥤','🧃','🍕','🥪','🍜','🥞','🍇','🍓','🍋','🥕','🧄','🫐','🍰','🍫','🍺','🍷','🥂','🎂']},
+    {l:'💪',e:['💪','🏃','🧘','🚴','🏋','🤸','🧗','🏊','⚽','🎯','🎾','🥊','🏆','🥇','🎽','🧢','👟','🏅','🥅','🎿','🏄','🤽','🚣','🥋']},
+    {l:'📚',e:['📚','📖','✏️','📝','📋','📌','📎','🗂','💻','⌨️','🖥','📊','📈','🗓','⏰','⏱','🔔','💡','🧠','🎯','📱','🖊','📓','📐']},
+    {l:'🌿',e:['🌿','🌸','🌻','🍀','🌈','☀️','🌙','⭐','🌊','🔥','❄️','🌱','🦋','🐝','🐶','🐱','🌴','🍃','🌺','🦊','🐸','🌵','🌾','🍂']},
+    {l:'✨',e:['✨','🎉','🎊','💎','🔮','🪄','🎭','🎨','🎵','🎸','🎤','🎬','🚀','💌','🪐','🌟','💫','🎁','💖','❤️','🧡','💛','💚','💙']},
+    {l:'🚗',e:['🚗','✈️','🚀','🚂','⛵','🚁','🛺','🏎','🛵','🚲','🛴','🛹','🚢','🚑','🚒','🚓','🛻','🚐','🚌','🚎','⛽','🗺','🏔','🌍']},
+  ];
+
+  function addBtn(em){
     const btn=document.createElement('button');
     btn.type='button';
     btn.style.cssText='background:none;border:none;font-size:1.35rem;cursor:pointer;padding:.25rem;border-radius:8px;transition:background .15s;line-height:1';
     btn.textContent=em;
     btn.addEventListener('mouseenter',()=>btn.style.background='var(--acc-l)');
     btn.addEventListener('mouseleave',()=>btn.style.background='none');
-    btn.addEventListener('click',()=>{inp.value=em;display.textContent=em;search.value='';showCatR(activeCatR);});
+    btn.addEventListener('click',()=>{
+      inp.value=em; display.textContent=em;
+      search.value=''; showCat(activeCat);
+      pickerBox.style.display='none'; // close after selection
+    });
     grid.appendChild(btn);
   }
-  function showCatR(idx){
-    activeCatR=idx;
+
+  // Picker box — hidden by default
+  const pickerBox=document.createElement('div');
+  pickerBox.style.display='none';
+  pickerBox.appendChild(search);
+  pickerBox.appendChild(catBar);
+  pickerBox.appendChild(grid);
+
+  // Toggle on click of the display square
+  display.style.cursor='pointer';
+  display.title='Choose an emoji';
+  display.addEventListener('click',()=>{
+    pickerBox.style.display=pickerBox.style.display==='none'?'block':'none';
+  });
+
+  function showCat(idx){
+    activeCat=idx;
     catBar.querySelectorAll('.recatbtn').forEach((b,i)=>b.style.background=i===idx?'var(--acc-l)':'var(--bg)');
     grid.innerHTML='';
-    EMOJI_CATS[idx].emojis.forEach(em=>addEmojiBtn(em));
+    ECAT[idx].e.forEach(em=>addBtn(em));
   }
-  EMOJI_CATS.forEach((cat,i)=>{
+
+  ECAT.forEach((cat,i)=>{
     const tab=document.createElement('button');
     tab.type='button'; tab.className='recatbtn';
     tab.style.cssText='background:var(--bg);border:none;font-size:1.1rem;cursor:pointer;padding:.3rem .4rem;border-radius:8px;flex-shrink:0;transition:background .15s';
-    tab.title=cat.name; tab.textContent=cat.label;
-    tab.addEventListener('click',()=>showCatR(i));
+    tab.textContent=cat.l;
+    tab.addEventListener('click',()=>showCat(i));
     catBar.appendChild(tab);
   });
-  showCatR(0);
-  inp.addEventListener('input',()=>{display.textContent=inp.value||'📋';});
+  showCat(0);
+
+  inp.addEventListener('input',()=>{ display.textContent=inp.value||'📋'; });
   search.addEventListener('input',()=>{
     grid.innerHTML='';
-    if(!search.value.trim()){showCatR(activeCatR);return;}
-    EMOJI_CATS.flatMap(c=>c.emojis).forEach(em=>addEmojiBtn(em));
+    if(!search.value.trim()){ showCat(activeCat); return; }
+    ECAT.flatMap(c=>c.e).forEach(em=>addBtn(em));
   });
+
+  // Append pickerBox to the wrap div (after the display+input row)
+  const wrap=document.getElementById('re-wrap');
+  if(wrap) wrap.appendChild(pickerBox);
 })();
 
-demo(); render();
+// ── INIT LANG ──────────────────────────────────────
+(function initLang() {
+  const saved = localStorage.getItem('habits_lang');
+  if(saved && LANGS[saved]) {
+    setLang(saved);
+  } else {
+    const browser = (navigator.language || 'en').substring(0,2);
+    if(LANGS[browser]) {
+      setLang(browser);
+    } else {
+      // Show picker — but first init T to English so render() doesn't crash
+      T = LANGS['en'].translations;
+      showLangScreen();
+      render(); // render with English while user picks
+    }
+  }
+})();
+
 </script>
 </body>
 </html>
