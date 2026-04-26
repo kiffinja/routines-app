@@ -215,6 +215,38 @@ textarea.finp{resize:vertical;min-height:68px}
   </div>
 </div>
 
+<!-- PAYWALL -->
+<div id="paywall-screen" class="hidden" style="position:fixed;inset:0;z-index:800;background:rgba(8,0,22,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1.5rem">
+  <div style="background:#fff;border-radius:28px;padding:2.5rem 2rem;max-width:360px;width:100%;text-align:center;box-shadow:0 28px 80px rgba(0,0,0,.3)">
+    <div style="font-size:3rem;margin-bottom:.8rem">✨</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:.5rem">Go Premium</div>
+    <div id="paywall-msg" style="font-size:.9rem;color:var(--ink-l);margin-bottom:1.5rem;line-height:1.5">Unlock unlimited routines and tasks.</div>
+    <div style="background:var(--bg);border-radius:14px;padding:1rem;margin-bottom:1.5rem;text-align:left">
+      <div style="font-size:.85rem;margin-bottom:.5rem;font-weight:600">Premium includes:</div>
+      <div style="font-size:.82rem;color:var(--ink-l);line-height:1.8">
+        ✅ Unlimited routines<br>
+        ✅ Unlimited tasks per routine<br>
+        ✅ Priority support<br>
+        ✅ All future features
+      </div>
+    </div>
+    <button onclick="handlePremiumPurchase()" style="width:100%;padding:.9rem;background:var(--ink);color:#fff;border:none;border-radius:14px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;margin-bottom:.7rem;transition:background .2s" onmouseover="this.style.background='var(--acc)'" onmouseout="this.style.background='var(--ink)'">
+      🚀 Upgrade — €1.50 / month
+    </button>
+    <!-- Promo code -->
+    <div style="margin-bottom:.7rem">
+      <div style="display:flex;gap:.4rem">
+        <input type="text" id="promo-input" placeholder="Promo code" style="flex:1;padding:.5rem .8rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;text-transform:uppercase">
+        <button onclick="applyPromo()" style="padding:.5rem .9rem;background:var(--acc);color:#fff;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer">OK</button>
+      </div>
+      <div id="promo-msg" style="font-size:.75rem;color:#c00;margin-top:.3rem;min-height:1rem"></div>
+    </div>
+    <button onclick="hidePaywall()" style="width:100%;padding:.7rem;background:none;border:none;color:var(--ink-l);font-family:'DM Sans',sans-serif;cursor:pointer;font-size:.88rem">
+      Maybe later
+    </button>
+  </div>
+</div>
+
 <!-- RUN -->
 <div id="run" class="hidden">
   <div class="rbg" id="rbg"></div>
@@ -275,7 +307,13 @@ let editId=null,_uid=0;
 const save=()=>localStorage.setItem('rtn5',JSON.stringify(routines));
 
 // ── STATIC BUTTON WIRING ──────────────────────────────
-document.getElementById('add-task-btn').addEventListener('click',()=>addTask());
+document.getElementById('add-task-btn').addEventListener('click',()=>{
+  const taskCount=document.querySelectorAll('#tl .ti').length;
+  if(!isPremium() && taskCount >= FREE_TASKS){
+    showPaywall('tasks'); return;
+  }
+  addTask();
+});
 document.getElementById('cancel-btn').addEventListener('click',closeModal);
 document.getElementById('save-btn').addEventListener('click',saveRoutine);
 document.getElementById('done-btn').addEventListener('click',()=>nextTask());
@@ -357,8 +395,14 @@ function render(){
     });
   }
   const addBtn=document.createElement('button');
-  addBtn.className='add-btn'; addBtn.innerHTML='＋ &nbsp;'+(T.create||'Create a routine');
-  addBtn.addEventListener('click',openNew);
+  addBtn.className='add-btn'; 
+  if(!isPremium() && routines.length >= FREE_ROUTINES){
+    addBtn.innerHTML='🔒 &nbsp;'+(T.create||'Create a routine')+' <span style="font-size:.72rem;background:#FF3CAC;color:#fff;border-radius:6px;padding:.1rem .4rem;margin-left:.3rem">€1.50/mo</span>';
+    addBtn.addEventListener('click',()=>showPaywall('routines'));
+  } else {
+    addBtn.innerHTML='＋ &nbsp;'+(T.create||'Create a routine');
+    addBtn.addEventListener('click',openNew);
+  }
   g.appendChild(addBtn);
 }
 
@@ -630,7 +674,51 @@ function enableDrag(item){
   });
 }
 
-// ── SAVE ─────────────────────────────────────────────
+// ── FREEMIUM ─────────────────────────────────────────
+const FREE_ROUTINES = 2;
+const FREE_TASKS    = 4;
+
+function isPremium(){
+  return localStorage.getItem('habits_premium') === 'true';
+}
+function unlockPremium(){
+  // In production this would verify a Play Store purchase
+  // For now, a simple unlock code system
+  localStorage.setItem('habits_premium','true');
+}
+function showPaywall(reason){
+  const el=document.getElementById('paywall-screen');
+  el.classList.remove('hidden');
+  el.style.display='flex';
+  document.getElementById('promo-input').value='';
+  document.getElementById('promo-msg').textContent='';
+  const msg = document.getElementById('paywall-msg');
+  if(reason==='routines') msg.textContent=(T.paywall_routines||'Free version is limited to 2 routines.');
+  else msg.textContent=(T.paywall_tasks||'Free version is limited to 4 tasks per routine.');
+}
+function hidePaywall(){
+  const el=document.getElementById('paywall-screen');
+  el.classList.add('hidden');
+  el.style.display='none';
+}
+
+// Promo codes — add yours here
+const PROMO_CODES = ['HABITS2024','TESTEUR','KIFFINJA','BETA2024','MLEGALL'];
+function applyPromo(){
+  const code = document.getElementById('promo-input').value.trim().toUpperCase();
+  const msg  = document.getElementById('promo-msg');
+  if(PROMO_CODES.includes(code)){
+    unlockPremium();
+    msg.style.color='#00C853';
+    msg.textContent='✅ Premium unlocked!';
+    setTimeout(()=>{ hidePaywall(); render(); }, 1200);
+  } else {
+    msg.style.color='#c00';
+    msg.textContent='❌ Invalid code.';
+  }
+}
+
+// ── SAVE ROUTINE ─────────────────────────────────────
 function saveRoutine(){
   const name=document.getElementById('rn').value.trim();
   if(!name){alert('Donnez un nom !');return;}
@@ -652,6 +740,19 @@ function saveRoutine(){
     if(title) tasks.push({title,desc,emoji:emojiVal,color,font,fontFam,italic,timer,timerMin});
   });
   if(!tasks.length){alert('Ajoutez au moins une tâche !');return;}
+
+  // ── FREEMIUM CHECKS ──
+  if(!isPremium()){
+    // New routine limit
+    if(editId===null && routines.length >= FREE_ROUTINES){
+      closeModal(); showPaywall('routines'); return;
+    }
+    // Task limit
+    if(tasks.length > FREE_TASKS){
+      showPaywall('tasks'); return;
+    }
+  }
+
   const alarm=readAlarmUI();
   const r={name,emoji,tasks,alarm};
   if(editId!==null) routines[editId]=r; else routines.push(r);
@@ -661,6 +762,18 @@ function saveRoutine(){
 function delRoutine(i){
   if(!confirm('Supprimer "'+routines[i].name+'" ?')) return;
   routines.splice(i,1); save(); render();
+}
+
+function handlePremiumPurchase(){
+  // In production: trigger Google Play Billing API
+  // For now: show confirmation and unlock
+  // This will be replaced with real billing when integrated
+  if(confirm('This will subscribe you to Premium for €1.50/month.\n\n(In the published app, this triggers Google Play subscription)')){
+    unlockPremium();
+    hidePaywall();
+    render();
+    alert('🎉 Welcome to Premium! Enjoy unlimited routines and tasks.');
+  }
 }
 
 // ── RUN MODE ─────────────────────────────────────────
