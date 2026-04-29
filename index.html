@@ -11,7 +11,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Routines</title>
-<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Boogaloo&family=Fredoka+One&family=Syne:wght@800&family=Space+Grotesk:wght@700&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Boogaloo&family=Fredoka+One&family=Syne:wght@800&family=Space+Grotesk:wght@700&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,700;1,700&family=Bangers&family=Pacifico&family=Titan+One&family=Abril+Fatface&family=Lobster&family=Chewy&family=Press+Start+2P&family=Lilita+One&family=Permanent+Marker&family=Russo+One&family=Playfair+Display:wght@700&family=Josefin+Sans:wght@700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#F3EEFF;--card:#fff;--ink:#1A1025;--ink-l:#7060A0;--border:#DDD4F5;--acc:#7C3AFF;--acc-l:#EDE5FF}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -231,7 +231,7 @@ textarea.finp{resize:vertical;min-height:68px}
       </div>
     </div>
     <button onclick="handlePremiumPurchase()" style="width:100%;padding:.9rem;background:var(--ink);color:#fff;border:none;border-radius:14px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;margin-bottom:.7rem;transition:background .2s" onmouseover="this.style.background='var(--acc)'" onmouseout="this.style.background='var(--ink)'">
-      🚀 Upgrade — €1.50 / month
+      🚀 Upgrade — €1.99 / month
     </button>
     <!-- Promo code -->
     <div style="margin-bottom:.7rem">
@@ -299,6 +299,18 @@ const FONTS=[
   {cls:'ff4',fam:"'Syne',sans-serif",label:'Syne',s:'Ss'},
   {cls:'ff5',fam:"'Fraunces',serif",label:'Fraunces',s:'Fn'},
   {cls:'ff6',fam:"'Space Grotesk',sans-serif",label:'Grotesk',s:'Gg'},
+  {cls:'ff7',fam:"'Bangers',cursive",label:'Bangers',s:'Bx'},
+  {cls:'ff8',fam:"'Pacifico',cursive",label:'Pacifico',s:'Pp'},
+  {cls:'ff9',fam:"'Titan One',cursive",label:'Titan',s:'Tt'},
+  {cls:'ff10',fam:"'Abril Fatface',cursive",label:'Abril',s:'Aa'},
+  {cls:'ff11',fam:"'Lobster',cursive",label:'Lobster',s:'Ll'},
+  {cls:'ff12',fam:"'Chewy',cursive",label:'Chewy',s:'Ch'},
+  {cls:'ff13',fam:"'Press Start 2P',cursive",label:'Pixel',s:'Px'},
+  {cls:'ff14',fam:"'Lilita One',cursive",label:'Lilita',s:'Li'},
+  {cls:'ff15',fam:"'Permanent Marker',cursive",label:'Marker',s:'Mk'},
+  {cls:'ff16',fam:"'Russo One',sans-serif",label:'Russo',s:'Ru'},
+  {cls:'ff17',fam:"'Playfair Display',serif",label:'Playfair',s:'Pl'},
+  {cls:'ff18',fam:"'Josefin Sans',sans-serif",label:'Josefin',s:'Jo'},
 ];
 
 let routines=[];
@@ -397,7 +409,7 @@ function render(){
   const addBtn=document.createElement('button');
   addBtn.className='add-btn'; 
   if(!isPremium() && routines.length >= FREE_ROUTINES){
-    addBtn.innerHTML='🔒 &nbsp;'+(T.create||'Create a routine')+' <span style="font-size:.72rem;background:#FF3CAC;color:#fff;border-radius:6px;padding:.1rem .4rem;margin-left:.3rem">€1.50/mo</span>';
+    addBtn.innerHTML='🔒 &nbsp;'+(T.create||'Create a routine')+' <span style="font-size:.72rem;background:#FF3CAC;color:#fff;border-radius:6px;padding:.1rem .4rem;margin-left:.3rem">€1.99/mo</span>';
     addBtn.addEventListener('click',()=>showPaywall('routines'));
   } else {
     addBtn.innerHTML='＋ &nbsp;'+(T.create||'Create a routine');
@@ -676,7 +688,7 @@ function enableDrag(item){
 
 // ── FREEMIUM ─────────────────────────────────────────
 const FREE_ROUTINES = 2;
-const FREE_TASKS    = 4;
+const FREE_TASKS    = 5;
 
 function isPremium(){
   return localStorage.getItem('habits_premium') === 'true';
@@ -694,7 +706,7 @@ function showPaywall(reason){
   document.getElementById('promo-msg').textContent='';
   const msg = document.getElementById('paywall-msg');
   if(reason==='routines') msg.textContent=(T.paywall_routines||'Free version is limited to 2 routines.');
-  else msg.textContent=(T.paywall_tasks||'Free version is limited to 4 tasks per routine.');
+  else msg.textContent=(T.paywall_tasks||'Free version is limited to 5 tasks per routine.');
 }
 function hidePaywall(){
   const el=document.getElementById('paywall-screen');
@@ -768,7 +780,7 @@ function handlePremiumPurchase(){
   // In production: trigger Google Play Billing API
   // For now: show confirmation and unlock
   // This will be replaced with real billing when integrated
-  if(confirm('This will subscribe you to Premium for €1.50/month.\n\n(In the published app, this triggers Google Play subscription)')){
+  if(confirm('This will subscribe you to Premium for €1.99/month.\n\n(In the published app, this triggers Google Play subscription)')){
     unlockPremium();
     hidePaywall();
     render();
@@ -870,17 +882,24 @@ function clearTimer(){
 function demo(){
   if(routines.length) return;
   routines=[
+    {name:'✨ Welcome to Habits!',emoji:'✨',tasks:[
+      {title:'👋 Welcome!',desc:'This is your first routine. Tap ▶ Launch to run it task by task. Tap Done! to move to the next step.',emoji:'👋',color:'#7C3AFF',font:'ff1',fontFam:"'Righteous',cursive",italic:false,timer:false,timerMin:5},
+      {title:'🎨 Customize everything',desc:'Each task has its own color, font and emoji. Edit this routine to try it out!',emoji:'🎨',color:'#FF3CAC',font:'ff8',fontFam:"'Pacifico',cursive",italic:false,timer:false,timerMin:5},
+      {title:'⏱ Add a timer',desc:'Enable a countdown on any task to stay focused. Perfect for workouts or study sessions!',emoji:'⏱',color:'#FF9100',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:true,timerMin:1},
+      {title:'🔔 Set an alarm',desc:'Schedule your routine at a fixed time on specific days. Edit the routine to set it up!',emoji:'🔔',color:'#00E5FF',font:'ff2',fontFam:"'Boogaloo',cursive",italic:false,timer:false,timerMin:5},
+      {title:'🚀 Create your own!',desc:'Tap + Create a routine to build your first custom routine. Enjoy up to 2 routines for free!',emoji:'🚀',color:'#00E676',font:'ff7',fontFam:"'Bangers',cursive",italic:false,timer:false,timerMin:5},
+    ],alarm:{on:false}},
     {name:'Ménage du matin',emoji:'🌅',tasks:[
       {title:'Faire le lit',desc:'Lisser les draps, arranger les oreillers !',emoji:'🛏️',color:'#FF3CAC',font:'ff1',fontFam:"'Righteous',cursive",italic:false,timer:false,timerMin:5},
       {title:'Essuyer les surfaces',desc:'Passer un chiffon humide sur les plans de travail.',emoji:'🧽',color:'#00E5FF',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:true,timerMin:3},
       {title:"Passer l'aspirateur",desc:'Salon et couloir, 5 minutes chrono.',emoji:'🧹',color:'#C8FF3E',font:'ff2',fontFam:"'Boogaloo',cursive",italic:false,timer:true,timerMin:5},
       {title:'Vider la machine',desc:'Mettre le linge à sécher.',emoji:'🧺',color:'#FF9100',font:'ff4',fontFam:"'Syne',sans-serif",italic:false,timer:false,timerMin:5},
-    ]},
+    ],alarm:{on:false}},
     {name:'Révision du soir',emoji:'📚',tasks:[
       {title:'Relire les notes',desc:'Parcourir les notes prises dans la journée.',emoji:'📝',color:'#7C3AFF',font:'ff5',fontFam:"'Fraunces',serif",italic:true,timer:true,timerMin:10},
       {title:'Flashcards',desc:'10 minutes de flashcards.',emoji:'🃏',color:'#00E676',font:'ff6',fontFam:"'Space Grotesk',sans-serif",italic:false,timer:true,timerMin:10},
       {title:'Résumé en 3 points',desc:'Écrire les 3 idées clés à retenir.',emoji:'✏️',color:'#FF6D9B',font:'ff2',fontFam:"'Boogaloo',cursive",italic:false,timer:false,timerMin:5},
-    ]},
+    ],alarm:{on:false}},
   ];
   save();
 }
