@@ -138,7 +138,7 @@ textarea.finp{resize:vertical;min-height:68px}
 </style>
 </head>
 <body>
-<div id="lang-screen" style="position:fixed;inset:0;background:#1A1025;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;overflow-y:auto">
+<div id="lang-screen" style="position:fixed;inset:0;background:#1A1025;z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem;overflow-y:auto">
   <div style="font-family:Righteous,cursive;font-size:2.8rem;color:#fff;margin-bottom:.3rem">Habits<span style="color:#C8FF3E">.</span></div>
   <div style="color:rgba(255,255,255,.5);font-size:.9rem;margin-bottom:2.5rem;text-align:center">Choose your language · Choisissez votre langue</div>
   <div id="lang-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;width:100%;max-width:400px"></div>
@@ -682,7 +682,7 @@ function saveRoutine(){
   const alarm=readAlarmUI();
   const r={name,emoji,tasks,alarm};
   if(editId!==null) routines[editId]=r; else routines.push(r);
-  save(); closeModal(); render();
+  save(); closeModal(); render(); scheduleAlarmsInSW();
 }
 
 function delRoutine(i){
@@ -795,103 +795,76 @@ function clearTimer(){
 // ── DEMO ─────────────────────────────────────────────
 function demo(){
   // No demo routines — app starts empty
-  // Onboarding triggered after render via initLang
+  
 }
 
-// ── ONBOARDING ────────────────────────────────────────
-function showOnboarding(){
-  if(localStorage.getItem('habits_onboarded')) return;
-  localStorage.setItem('habits_onboarded','1');
 
-  const tips = [
-    {selector:'#lang-btn',        text:'🌐 Change language',         pos:'bottom'},
-    {selector:'.rc:first-child',  text:'👆 Tap Launch to start your routine!', pos:'bottom'},
-    {selector:'.rc .rc-acts',     text:'✏️ Edit   🗑 Delete',        pos:'left'},
-    {selector:'.add-btn',         text:'＋ Create your own routine', pos:'top'},
-  ];
-
-  const overlay = document.createElement('div');
-  overlay.id='onboarding-overlay';
-  overlay.style.cssText='position:fixed;inset:0;z-index:8000;pointer-events:none';
-
-  // Dark backdrop
-  const backdrop = document.createElement('div');
-  backdrop.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:8000;pointer-events:all';
-  backdrop.addEventListener('click', closeOnboarding);
-  overlay.appendChild(backdrop);
-
-  let currentTip = 0;
-
-  function showTip(idx){
-    // Remove previous tooltip
-    overlay.querySelectorAll('.ob-tip').forEach(e=>e.remove());
-    overlay.querySelectorAll('.ob-highlight').forEach(e=>e.remove());
-
-    if(idx >= tips.length){ closeOnboarding(); return; }
-
-    const tip = tips[idx];
-    const el = document.querySelector(tip.selector);
-    if(!el){ showTip(idx+1); return; }
-
-    const rect = el.getBoundingClientRect();
-
-    // Highlight box
-    const hl = document.createElement('div');
-    hl.className='ob-highlight';
-    hl.style.cssText=`position:fixed;left:${rect.left-6}px;top:${rect.top-6}px;width:${rect.width+12}px;height:${rect.height+12}px;border:3px solid #C8FF3E;border-radius:14px;z-index:8001;pointer-events:none;box-shadow:0 0 0 4000px rgba(0,0,0,.55);`;
-    overlay.appendChild(hl);
-
-    // Tooltip bubble
-    const bubble = document.createElement('div');
-    bubble.className='ob-tip';
-    bubble.style.cssText=`position:fixed;background:#1A1025;color:#fff;font-family:'Fredoka One',cursive;font-size:1rem;padding:.7rem 1.1rem;border-radius:14px;z-index:8002;pointer-events:all;cursor:pointer;border:2px solid #C8FF3E;max-width:220px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.4)`;
-    bubble.innerHTML = tip.text + '<div style="font-size:.72rem;margin-top:.3rem;color:#C8FF3E;font-family:DM Sans,sans-serif">' + (idx < tips.length-1 ? 'Tap to continue →' : 'Tap to finish ✓') + '</div>';
-
-    // Position tooltip
-    let top, left;
-    if(tip.pos==='bottom'){ top=rect.bottom+12; left=rect.left+rect.width/2-110; }
-    else if(tip.pos==='top'){ top=rect.top-80; left=rect.left+rect.width/2-110; }
-    else if(tip.pos==='left'){ top=rect.top+rect.height/2-30; left=rect.left-240; }
-    else { top=rect.bottom+12; left=rect.left; }
-
-    // Keep in viewport
-    left=Math.max(8,Math.min(left,window.innerWidth-228));
-    top=Math.max(8,Math.min(top,window.innerHeight-100));
-
-    bubble.style.top=top+'px';
-    bubble.style.left=left+'px';
-    bubble.addEventListener('click',(e)=>{ e.stopPropagation(); showTip(idx+1); });
-    overlay.appendChild(bubble);
-  }
-
-  function closeOnboarding(){
-    overlay.remove();
-  }
-
-  document.body.appendChild(overlay);
-  showTip(0);
+// ── NOTIFICATIONS & SERVICE WORKER ALARM ────────────
+function requestNotifPermission(cb){
+  if(!('Notification' in window)){ if(cb) cb(false); return; }
+  if(Notification.permission === 'granted'){ if(cb) cb(true); return; }
+  Notification.requestPermission().then(p=>{ if(cb) cb(p==='granted'); });
 }
-
-// ── NOTIFICATIONS ───────────────────────────────────
-function requestNotifPermission(){
-  if('Notification' in window && Notification.permission === 'default'){
-    Notification.requestPermission();
-  }
-}
-requestNotifPermission();
 
 function fireNotification(routineName){
-  if('Notification' in window && Notification.permission === 'granted'){
-    const n = new Notification('⏰ Time for: ' + routineName, {
-      body: 'Your routine is starting now! Tap to open.',
-      icon: 'https://kiffinja.github.io/routines-app/icon-192.png',
-      badge: 'https://kiffinja.github.io/routines-app/icon-192.png',
-      vibrate: [200, 100, 200],
-      tag: 'habits-alarm'
-    });
-    n.onclick = () => { window.focus(); n.close(); };
-  }
+  const fire = () => {
+    if('serviceWorker' in navigator && navigator.serviceWorker.controller){
+      navigator.serviceWorker.controller.postMessage({
+        type:'SHOW_NOTIFICATION',
+        title:'⏰ ' + routineName,
+        body:'Your routine is starting now! Tap to open.',
+        icon:'https://kiffinja.github.io/routines-app/icon-192.png',
+        badge:'https://kiffinja.github.io/routines-app/icon-192.png',
+        vibrate:[300,100,300,100,300],
+        tag:'habits-alarm-'+Date.now()
+      });
+    } else if('Notification' in window && Notification.permission==='granted'){
+      const n=new Notification('⏰ '+routineName,{
+        body:'Your routine is starting now! Tap to open.',
+        icon:'https://kiffinja.github.io/routines-app/icon-192.png',
+        vibrate:[300,100,300],
+        tag:'habits-alarm'
+      });
+      n.onclick=()=>{ window.focus(); n.close(); };
+    }
+    // Also play sound
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)();
+      [523,659,784,659,523].forEach((freq,j)=>{
+        const osc=ctx.createOscillator();
+        const gain=ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value=freq; osc.type='sine';
+        gain.gain.setValueAtTime(0.4,ctx.currentTime+j*0.2);
+        gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+j*0.2+0.35);
+        osc.start(ctx.currentTime+j*0.2);
+        osc.stop(ctx.currentTime+j*0.2+0.35);
+      });
+    } catch(e){}
+  };
+  if(Notification.permission==='granted'){ fire(); }
+  else { requestNotifPermission(ok=>{ if(ok) fire(); }); }
 }
+
+// Schedule alarms via Service Worker for background delivery
+function scheduleAlarmsInSW(){
+  if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+  const alarms=[];
+  routines.forEach(r=>{
+    if(!r.alarm||!r.alarm.on||!r.alarm.days||!r.alarm.days.length) return;
+    const ms=getNextAlarm(r.alarm);
+    if(ms!==null && ms>0 && ms<48*3600*1000){
+      alarms.push({routineName:r.name, fireAt:Date.now()+ms});
+    }
+  });
+  navigator.serviceWorker.controller.postMessage({type:'SCHEDULE_ALARMS',alarms});
+}
+
+// Request permission on first interaction
+document.addEventListener('click',function askPerm(){
+  requestNotifPermission(()=>scheduleAlarmsInSW());
+  document.removeEventListener('click',askPerm);
+},{once:true});
 
 // ── ALARM ENGINE ─────────────────────────────────────
 function getNextAlarm(alarm) {
@@ -998,7 +971,7 @@ function setLang(code) {
   localStorage.setItem('habits_lang', code);
   document.documentElement.lang = code;
   document.documentElement.dir = lang.dir || 'ltr';
-  document.getElementById('lang-screen').style.display = 'none';
+  const ls=document.getElementById('lang-screen'); if(ls) ls.style.display='none';
   // Update static button labels
   const addTaskBtn = document.getElementById('add-task-btn');
   if(addTaskBtn) addTaskBtn.textContent = T.add_task || '+ Add a task';
@@ -1112,7 +1085,7 @@ document.getElementById('re').addEventListener('input', function(){
     const code = LANGS[browser] ? browser : 'en';
     setLang(code);
     // Show onboarding on first launch
-    setTimeout(showOnboarding, 600);
+    
   }
 })();
 
