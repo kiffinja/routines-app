@@ -794,20 +794,7 @@ function clearTimer(){
 
 // ── DEMO ─────────────────────────────────────────────
 function demo(){
-  if(routines.length) return;
-  routines=[{
-    name:'🌅 Morning Rise',
-    emoji:'🌅',
-    tasks:[
-      {title:'Silence the alarm',desc:'Resist the snooze! Put your phone face down and take a deep breath.',emoji:'⏰',color:'hsl(200,80%,55%)',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:true,timerMin:1},
-      {title:'Stretch in bed',desc:'Arms up, legs long. Hold for 30 seconds. Wake up your body gently.',emoji:'🧘',color:'hsl(280,80%,55%)',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:true,timerMin:1},
-      {title:'Make your bed',desc:'Smooth the sheets, fluff the pillows. A made bed = a productive day.',emoji:'🛏️',color:'hsl(160,80%,55%)',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:true,timerMin:2},
-      {title:'Drink a glass of water',desc:'Your body is dehydrated after 8 hours of sleep. Hydrate first thing!',emoji:'💧',color:'hsl(220,80%,55%)',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:false,timerMin:5},
-      {title:'Open the curtains',desc:'Let the light in! Natural light wakes up your brain and boosts your mood.',emoji:'☀️',color:'hsl(40,80%,55%)',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:false,timerMin:5},
-    ],
-    alarm:{on:false}
-  }];
-  save();
+  // No demo routines — app starts empty
   // Onboarding triggered after render via initLang
 }
 
