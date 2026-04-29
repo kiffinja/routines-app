@@ -155,31 +155,24 @@ textarea.finp{resize:vertical;min-height:68px}
     <div class="mh" id="mh">New routine</div>
     <div class="fg">
       <span class="lb" id="lbl-rname">Name</span>
-      <input type="text" id="rn" class="finp" placeholder="Ex: Morning zen, Sport…">
-    </div>
-    <div class="fg">
-      <span class="lb" id="lbl-remoji">Routine emoji</span>
-      <div id="re-wrap">
-        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
-          <div id="re-display" style="width:52px;height:52px;border-radius:12px;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0">📋</div>
-          <input type="text" id="re" class="finp emoji-inp" maxlength="4" placeholder="📋" style="flex:1;font-size:1.2rem">
-        </div>
-        <input type="text" id="re-search" class="finp" placeholder="🔍 Search…" style="width:100%;font-size:.9rem;margin-bottom:.5rem">
-        <div id="re-catbar" style="display:flex;gap:.3rem;margin-bottom:.5rem;overflow-x:auto;padding-bottom:.2rem"></div>
-        <div id="re-grid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:.25rem;max-height:130px;overflow-y:auto;padding:.1rem"></div>
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <input type="text" id="re" class="finp" maxlength="4" placeholder="📋" style="width:52px;font-size:1.4rem;text-align:center;padding:.4rem;flex-shrink:0">
+        <input type="text" id="rn" class="finp" placeholder="Ex: Morning zen, Sport…" style="flex:1">
       </div>
     </div>
     <div class="sep"></div>
     <div class="fg" id="alarm-section">
       <span class="lb">⏰ Alarm</span>
       <label class="chk-lbl" style="margin-bottom:.6rem">
-        <input type="checkbox" id="alarm-on"> Enable an alarm for this routine
+        <input type="checkbox" id="alarm-on"> <span id="alarm-on-label">Enable an alarm for this routine</span>
       </label>
       <div id="alarm-settings" style="display:none;background:var(--bg);border-radius:12px;padding:.9rem;display:none;flex-direction:column;gap:.8rem">
-        <!-- Time -->
+        <!-- Time + countdown before -->
         <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
           <span style="font-size:.82rem;color:var(--ink-l);min-width:60px">Time</span>
           <input type="time" id="alarm-time" value="08:00" class="finp" style="width:130px">
+          <input type="number" id="alarm-before" min="0" max="24" value="2" style="width:55px;padding:.35rem .5rem;border:2px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;text-align:center;outline:none">
+          <span style="font-size:.82rem;color:var(--ink-l)">h before countdown</span>
         </div>
         <!-- Days -->
         <div>
@@ -193,12 +186,6 @@ textarea.finp{resize:vertical;min-height:68px}
             <button type="button" class="day-btn" data-d="6">Sat</button>
             <button type="button" class="day-btn" data-d="0">Sun</button>
           </div>
-        </div>
-        <!-- Show countdown X hours before -->
-        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
-          <span style="font-size:.82rem;color:var(--ink-l)">Show countdown</span>
-          <input type="number" id="alarm-before" min="0" max="24" value="2" style="width:60px;padding:.35rem .5rem;border:2px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;text-align:center;outline:none">
-          <span style="font-size:.82rem;color:var(--ink-l)">hours before</span>
         </div>
       </div>
     </div>
@@ -516,131 +503,42 @@ function addTask(t){
   const body=document.createElement('div');
   body.className='tb';
 
-  // Title input
+  // Title + emoji inline
+  const titleRow=document.createElement('div');
+  titleRow.style.cssText='display:flex;align-items:center;gap:.5rem';
+  const emojiInp=document.createElement('input');
+  emojiInp.type='text'; emojiInp.className='finp emoji-inp'; emojiInp.maxLength=4; emojiInp.value=d.emoji||'✨';
+  emojiInp.style.cssText='width:52px;font-size:1.4rem;text-align:center;padding:.4rem;flex-shrink:0';
+  emojiInp.addEventListener('input',()=>{ emojiSpan.textContent=emojiInp.value||'✨'; });
   const titleInp=document.createElement('input');
   titleInp.type='text'; titleInp.className='finp'; titleInp.placeholder=T.task_title||'Task title'; titleInp.value=d.title||'';
+  titleInp.style.flex='1';
   titleInp.addEventListener('input',()=>{ prev.textContent=titleInp.value||(T.new_task||'New task'); });
-  body.appendChild(mkFG(T.task_title||'Title',titleInp));
+  titleRow.append(emojiInp,titleInp);
+  body.appendChild(mkFG(T.task_title||'Title',titleRow));
 
   // Desc
   const descInp=document.createElement('textarea');
   descInp.className='finp'; descInp.placeholder=T.task_desc||'Details…'; descInp.value=d.desc||'';
   body.appendChild(mkFG(T.task_desc||'Description',descInp));
 
-  // Emoji picker
-  const emojiWrap=document.createElement('div');
-
-  // Current emoji display + input
-  const emojiTop=document.createElement('div');
-  emojiTop.style.cssText='display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem';
-  const emojiDisplay=document.createElement('div');
-  emojiDisplay.style.cssText='width:52px;height:52px;border-radius:12px;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0';
-  emojiDisplay.textContent=d.emoji||'✨';
-  const emojiInp=document.createElement('input');
-  emojiInp.type='text'; emojiInp.className='finp emoji-inp'; emojiInp.maxLength=4; emojiInp.value=d.emoji||'✨';
-  emojiInp.placeholder=T.task_emoji||'Emoji';
-  emojiInp.style.cssText='flex:1;font-size:1.2rem';
-  emojiInp.addEventListener('input',()=>{
-    const v=emojiInp.value||'✨';
-    emojiSpan.textContent=v; emojiDisplay.textContent=v;
-  });
-  emojiTop.append(emojiDisplay,emojiInp);
-
-  // Category tabs + grid
-  const EMOJI_CATS=[
-    {label:'😀',name:'Visages',emojis:['😀','😂','🥰','😎','🤩','😴','🤔','😅','🥳','😇','🤗','😤','🥺','😜','🤯','😱','🤖','👻','💀','😈']},
-    {label:'🏠',name:'Maison',emojis:['🏠','🛏','🛁','🚿','🪣','🧹','🧽','🧴','🪥','🧺','🪟','🚪','🛋','🪑','🖼','💡','🕯','🧸','🪴','🗑']},
-    {label:'🍎',name:'Nourriture',emojis:['🍎','🥑','🥗','🍳','☕','🍵','🥤','🧃','🍕','🥪','🍜','🥞','🍇','🍓','🍋','🥕','🧄','🫐','🍰','🍫']},
-    {label:'💪',name:'Sport',emojis:['💪','🏃','🧘','🚴','🏋','🤸','🧗','🏊','⚽','🎯','🎾','🥊','🏆','🥇','🎽','🧢','👟','🏅','🥅','🎿']},
-    {label:'📚',name:'Travail',emojis:['📚','📖','✏️','📝','📋','📌','📎','🗂','💻','⌨️','🖥','📊','📈','🗓','⏰','⏱','🔔','💡','🧠','🎯']},
-    {label:'🌿',name:'Nature',emojis:['🌿','🌸','🌻','🍀','🌈','☀️','🌙','⭐','🌊','🔥','❄️','🌱','🦋','🐝','🐶','🐱','🌴','🍃','🌺','🦊']},
-    {label:'✨',name:'Divers',emojis:['✨','🎉','🎊','💎','🔮','🪄','🎭','🎨','🎵','🎸','🎤','🎬','🚀','💌','🪐','🌟','💫','🎁','🛍','💖']},
-  ];
-
-  const catBar=document.createElement('div');
-  catBar.style.cssText='display:flex;gap:.3rem;margin-bottom:.5rem;overflow-x:auto;padding-bottom:.2rem';
-
-  const grid=document.createElement('div');
-  grid.style.cssText='display:grid;grid-template-columns:repeat(8,1fr);gap:.25rem;max-height:140px;overflow-y:auto;padding:.1rem';
-
-  // Picker container — hidden by default, toggles on click
-  const pickerWrap=document.createElement('div');
-  pickerWrap.style.display='none';
-  pickerWrap.append(catBar,grid);
-
-  emojiDisplay.style.cursor='pointer';
-  emojiDisplay.title='Choisir un emoji';
-  emojiDisplay.addEventListener('click',()=>{
-    pickerWrap.style.display=pickerWrap.style.display==='none'?'block':'none';
-  });
-
-  function showCat(idx){
-    catBar.querySelectorAll('.ecat').forEach((b,i)=>b.style.background=i===idx?'var(--acc-l)':'var(--bg)');
-    grid.innerHTML='';
-    EMOJI_CATS[idx].emojis.forEach(em=>{
-      const btn=document.createElement('button');
-      btn.type='button';
-      btn.style.cssText='background:none;border:none;font-size:1.35rem;cursor:pointer;padding:.25rem;border-radius:8px;transition:background .15s;line-height:1';
-      btn.textContent=em;
-      btn.addEventListener('mouseenter',()=>btn.style.background='var(--acc-l)');
-      btn.addEventListener('mouseleave',()=>btn.style.background='none');
-      btn.addEventListener('click',()=>{
-        emojiInp.value=em; emojiSpan.textContent=em; emojiDisplay.textContent=em;
-        pickerWrap.style.display='none'; // close after selection
-      });
-      grid.appendChild(btn);
-    });
+  // Color hue slider
+  const initHue = d.color ? hslFromHex(d.color) : 300;
+  const hueSlider=document.createElement('input');
+  hueSlider.type='range'; hueSlider.min=0; hueSlider.max=359; hueSlider.value=initHue;
+  hueSlider.style.cssText='width:100%;height:28px;border-radius:12px;cursor:pointer;outline:none;border:none;appearance:none;-webkit-appearance:none;background:linear-gradient(to right,hsl(0,80%,55%),hsl(40,80%,55%),hsl(80,80%,55%),hsl(120,80%,55%),hsl(160,80%,55%),hsl(200,80%,55%),hsl(240,80%,55%),hsl(280,80%,55%),hsl(320,80%,55%),hsl(359,80%,55%))';
+  function updateColor(hue){
+    const col=`hsl(${hue},80%,55%)`;
+    num.style.background=col;
+    fprev.style.background=col+'40'; fprev.style.color=col;
   }
+  updateColor(initHue);
+  hueSlider.addEventListener('input',()=>updateColor(+hueSlider.value));
+  hueSlider.dataset.colorRef='true';
+  body.appendChild(mkFG(T.task_color||'Background color',hueSlider));
 
-  EMOJI_CATS.forEach((cat,i)=>{
-    const tab=document.createElement('button');
-    tab.type='button'; tab.className='ecat';
-    tab.style.cssText='background:var(--bg);border:none;font-size:1.1rem;cursor:pointer;padding:.3rem .4rem;border-radius:8px;flex-shrink:0;transition:background .15s';
-    tab.title=cat.name; tab.textContent=cat.label;
-    tab.addEventListener('click',()=>showCat(i));
-    catBar.appendChild(tab);
-  });
-  showCat(0);
-
-  emojiWrap.append(emojiTop,pickerWrap);
-  body.appendChild(mkFG(T.task_emoji||'Emoji',emojiWrap));
-
-
-  // Color swatches
-  const tcRow=document.createElement('div'); tcRow.className='tc-row';
-  TPAL.forEach(p=>{
-    const sw=document.createElement('div');
-    sw.className='tcsw'+(p.h===d.color?' on':'');
-    sw.style.background=p.h; sw.dataset.h=p.h;
-    sw.addEventListener('click',()=>{
-      tcRow.querySelectorAll('.tcsw').forEach(s=>s.classList.remove('on'));
-      sw.classList.add('on');
-      num.style.background=p.h;
-      fprev.style.background=p.h+'25'; fprev.style.color=p.h;
-    });
-    tcRow.appendChild(sw);
-  });
-  body.appendChild(mkFG(T.task_color||'Background color',tcRow));
-
-  // Font pills
-  const fgrid=document.createElement('div'); fgrid.className='fgrid';
-  FONTS.forEach(f=>{
-    const pill=document.createElement('div');
-    pill.className='fp'+(f.cls===d.font?' on':'');
-    pill.style.fontFamily=f.fam; pill.dataset.cls=f.cls; pill.dataset.fam=f.fam;
-    pill.innerHTML=f.s+'<span class="fn">'+f.label+'</span>';
-    pill.addEventListener('click',()=>{
-      fgrid.querySelectorAll('.fp').forEach(p=>p.classList.remove('on'));
-      pill.classList.add('on');
-      fprev.style.fontFamily=f.fam; fprev.textContent=f.label;
-    });
-    fgrid.appendChild(pill);
-  });
-  const italLbl=document.createElement('label'); italLbl.className='chk-lbl'; italLbl.style.marginTop='.5rem';
-  const italCb=document.createElement('input'); italCb.type='checkbox'; italCb.checked=!!d.italic;
-  italLbl.append(italCb,' '+(T.task_italic||'Italic'));
-  const fontFG=mkFG(T.task_font||'Font',fgrid); fontFG.appendChild(italLbl);
-  body.appendChild(fontFG);
+  // Font fixed to Fredoka One
+  const fixedFont='ff3'; const fixedFam="'Fredoka One',cursive";
 
   // Timer
   const timerLbl=document.createElement('label'); timerLbl.className='chk-lbl';
@@ -659,6 +557,22 @@ function addTask(t){
   enableDrag(item);
   list.appendChild(item);
   renum();
+}
+
+function hslFromHex(hex){
+  // Convert hex to HSL hue approximation
+  const r=parseInt(hex.slice(1,3),16)/255;
+  const g=parseInt(hex.slice(3,5),16)/255;
+  const b=parseInt(hex.slice(5,7),16)/255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h=0;
+  if(max!==min){
+    const d=max-min;
+    if(max===r) h=((g-b)/d+(g<b?6:0))/6;
+    else if(max===g) h=((b-r)/d+2)/6;
+    else h=((r-g)/d+4)/6;
+  }
+  return Math.round(h*360);
 }
 
 function mkFG(label,el){
@@ -740,11 +654,10 @@ function saveRoutine(){
     const title=it.querySelector('input[type=text].finp:not(.emoji-inp)')?.value.trim()||'';
     const desc=it.querySelector('textarea')?.value.trim()||'';
     const emojiVal=it.querySelector('.emoji-inp')?.value||'✨';
-    const tcSw=it.querySelector('.tcsw.on');
-    const color=tcSw?.dataset.h||TPAL[0].h;
-    const fp=it.querySelector('.fp.on');
-    const font=fp?.dataset.cls||'ff3';
-    const fontFam=fp?.dataset.fam||"'Fredoka One',cursive";
+    const hueSliderEl=it.querySelector('input[type=range]');
+    const hue=hueSliderEl?+hueSliderEl.value:300;
+    const color=`hsl(${hue},80%,55%)`;
+    const font='ff3'; const fontFam="'Fredoka One',cursive";
     const cbs=it.querySelectorAll('input[type=checkbox]');
     const italic=cbs[0]?.checked||false;
     const timer=cbs[1]?.checked||false;
@@ -904,6 +817,27 @@ function demo(){
   save();
 }
 
+// ── NOTIFICATIONS ───────────────────────────────────
+function requestNotifPermission(){
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
+}
+requestNotifPermission();
+
+function fireNotification(routineName){
+  if('Notification' in window && Notification.permission === 'granted'){
+    const n = new Notification('⏰ Time for: ' + routineName, {
+      body: 'Your routine is starting now! Tap to open.',
+      icon: 'https://kiffinja.github.io/routines-app/icon-192.png',
+      badge: 'https://kiffinja.github.io/routines-app/icon-192.png',
+      vibrate: [200, 100, 200],
+      tag: 'habits-alarm'
+    });
+    n.onclick = () => { window.focus(); n.close(); };
+  }
+}
+
 // ── ALARM ENGINE ─────────────────────────────────────
 function getNextAlarm(alarm) {
   // Returns ms until next alarm trigger, or null if not applicable
@@ -970,7 +904,8 @@ function checkAlarmFire(){
     if(!r.alarm||!r.alarm.on) return;
     const ms=getNextAlarm(r.alarm);
     if(ms!==null&&ms<2000&&ms>0){
-      // Fire alarm!
+      // Fire real notification!
+      fireNotification(r.name);
       try{
         const ctx=new(window.AudioContext||window.webkitAudioContext)();
         [523,659,784].forEach((freq,j)=>{
@@ -998,7 +933,7 @@ demo();
 // ════════════════════════════════════════
 // i18n SYSTEM
 // ════════════════════════════════════════
-const LANGS={"en": {"name": "English", "flag": "🇬🇧", "dir": "ltr", "translations": {"my_routines": "My routines", "create": "Create a routine", "new_routine": "New routine", "edit_routine": "Edit routine", "routine_name": "Name", "routine_emoji": "Routine emoji", "tasks": "Tasks", "add_task": "＋ Add a task", "cancel": "Cancel", "save": "Save", "task_title": "Task title", "task_desc": "Description", "task_emoji": "Emoji", "task_color": "Background color", "task_font": "Font", "task_italic": "Italic", "task_timer": "Timer", "task_timer_on": "Enable a timer", "task_minutes": "minutes", "done": "✓ Done!", "skip": "Skip", "congrats": "Well done!", "tasks_done": "task(s) completed!", "back": "Back to routines", "empty": "No routines yet.\nCreate one!", "delete_confirm": "Delete", "n_tasks": "task", "n_tasks_pl": "tasks", "launch": "▶ Launch", "search_emoji": "🔍 Search…", "chrono": "timer", "no_routines": "No routines.", "create_one": "Create one!"}}, "fr": {"name": "Français", "flag": "🇫🇷", "dir": "ltr", "translations": {"my_routines": "Mes routines", "create": "Créer une routine", "new_routine": "Nouvelle routine", "edit_routine": "Modifier la routine", "routine_name": "Nom", "routine_emoji": "Emoji de la routine", "tasks": "Tâches", "add_task": "＋ Ajouter une tâche", "cancel": "Annuler", "save": "Enregistrer", "task_title": "Titre de la tâche", "task_desc": "Description", "task_emoji": "Emoji", "task_color": "Couleur de fond", "task_font": "Typographie", "task_italic": "Italique", "task_timer": "Chronomètre", "task_timer_on": "Activer un chrono", "task_minutes": "minutes", "done": "✓ C'est fait !", "skip": "Passer", "congrats": "Bravo !", "tasks_done": "tâche(s) accomplie(s) !", "back": "Retour aux routines", "empty": "Aucune routine.\nCréez-en une !", "delete_confirm": "Supprimer", "n_tasks": "tâche", "n_tasks_pl": "tâches", "launch": "▶ Lancer", "search_emoji": "🔍 Rechercher…", "chrono": "chrono", "no_routines": "Aucune routine.", "create_one": "Créez-en une !"}}, "es": {"name": "Español", "flag": "🇪🇸", "dir": "ltr", "translations": {"my_routines": "Mis rutinas", "create": "Crear rutina", "new_routine": "Nueva rutina", "edit_routine": "Editar rutina", "routine_name": "Nombre", "routine_emoji": "Emoji rutina", "tasks": "Tareas", "add_task": "＋ Añadir tarea", "cancel": "Cancelar", "save": "Guardar", "task_title": "Título", "task_desc": "Descripción", "task_emoji": "Emoji", "task_color": "Color de fondo", "task_font": "Tipografía", "task_italic": "Cursiva", "task_timer": "Cronómetro", "task_timer_on": "Activar cronómetro", "task_minutes": "minutos", "done": "✓ ¡Hecho!", "skip": "Saltar", "congrats": "¡Bravo!", "tasks_done": "tarea(s) completada(s)", "back": "Volver", "empty": "Sin rutinas.\n¡Crea una!", "delete_confirm": "Eliminar", "n_tasks": "tarea", "n_tasks_pl": "tareas", "launch": "▶ Iniciar", "search_emoji": "🔍 Buscar…", "chrono": "crono", "no_routines": "Sin rutinas.", "create_one": "¡Crea una!"}}, "de": {"name": "Deutsch", "flag": "🇩🇪", "dir": "ltr", "translations": {"my_routines": "Meine Routinen", "create": "Routine erstellen", "new_routine": "Neue Routine", "edit_routine": "Routine bearbeiten", "routine_name": "Name", "routine_emoji": "Routine-Emoji", "tasks": "Aufgaben", "add_task": "＋ Aufgabe hinzufügen", "cancel": "Abbrechen", "save": "Speichern", "task_title": "Aufgabentitel", "task_desc": "Beschreibung", "task_emoji": "Emoji", "task_color": "Hintergrundfarbe", "task_font": "Schriftart", "task_italic": "Kursiv", "task_timer": "Timer", "task_timer_on": "Timer aktivieren", "task_minutes": "Minuten", "done": "✓ Fertig!", "skip": "Überspringen", "congrats": "Bravo!", "tasks_done": "Aufgabe(n) erledigt!", "back": "Zurück", "empty": "Keine Routinen.\nErstelle eine!", "delete_confirm": "Löschen", "n_tasks": "Aufgabe", "n_tasks_pl": "Aufgaben", "launch": "▶ Starten", "search_emoji": "🔍 Suchen…", "chrono": "Timer", "no_routines": "Keine Routinen.", "create_one": "Erstelle eine!"}}, "it": {"name": "Italiano", "flag": "🇮🇹", "dir": "ltr", "translations": {"my_routines": "Le mie routine", "create": "Crea routine", "new_routine": "Nuova routine", "edit_routine": "Modifica routine", "routine_name": "Nome", "routine_emoji": "Emoji routine", "tasks": "Attività", "add_task": "＋ Aggiungi attività", "cancel": "Annulla", "save": "Salva", "task_title": "Titolo attività", "task_desc": "Descrizione", "task_emoji": "Emoji", "task_color": "Colore sfondo", "task_font": "Tipografia", "task_italic": "Corsivo", "task_timer": "Timer", "task_timer_on": "Attiva timer", "task_minutes": "minuti", "done": "✓ Fatto!", "skip": "Salta", "congrats": "Bravo!", "tasks_done": "attività completata/e!", "back": "Torna", "empty": "Nessuna routine.\nCreane una!", "delete_confirm": "Elimina", "n_tasks": "attività", "n_tasks_pl": "attività", "launch": "▶ Avvia", "search_emoji": "🔍 Cerca…", "chrono": "timer", "no_routines": "Nessuna routine.", "create_one": "Creane una!"}}, "pt": {"name": "Português", "flag": "🇵🇹", "dir": "ltr", "translations": {"my_routines": "Minhas rotinas", "create": "Criar rotina", "new_routine": "Nova rotina", "edit_routine": "Editar rotina", "routine_name": "Nome", "routine_emoji": "Emoji da rotina", "tasks": "Tarefas", "add_task": "＋ Adicionar tarefa", "cancel": "Cancelar", "save": "Guardar", "task_title": "Título da tarefa", "task_desc": "Descrição", "task_emoji": "Emoji", "task_color": "Cor de fundo", "task_font": "Tipografia", "task_italic": "Itálico", "task_timer": "Cronómetro", "task_timer_on": "Ativar cronómetro", "task_minutes": "minutos", "done": "✓ Feito!", "skip": "Saltar", "congrats": "Parabéns!", "tasks_done": "tarefa(s) concluída(s)!", "back": "Voltar", "empty": "Sem rotinas.\nCrie uma!", "delete_confirm": "Eliminar", "n_tasks": "tarefa", "n_tasks_pl": "tarefas", "launch": "▶ Iniciar", "search_emoji": "🔍 Pesquisar…", "chrono": "crono", "no_routines": "Sem rotinas.", "create_one": "Crie uma!"}}, "nl": {"name": "Nederlands", "flag": "🇳🇱", "dir": "ltr", "translations": {"my_routines": "Mijn routines", "create": "Routine maken", "new_routine": "Nieuwe routine", "edit_routine": "Routine bewerken", "routine_name": "Naam", "routine_emoji": "Routine-emoji", "tasks": "Taken", "add_task": "＋ Taak toevoegen", "cancel": "Annuleren", "save": "Opslaan", "task_title": "Taaknaam", "task_desc": "Omschrijving", "task_emoji": "Emoji", "task_color": "Achtergrondkleur", "task_font": "Lettertype", "task_italic": "Cursief", "task_timer": "Timer", "task_timer_on": "Timer inschakelen", "task_minutes": "minuten", "done": "✓ Klaar!", "skip": "Overslaan", "congrats": "Geweldig!", "tasks_done": "taak/taken voltooid!", "back": "Terug", "empty": "Geen routines.\nMaak er een!", "delete_confirm": "Verwijderen", "n_tasks": "taak", "n_tasks_pl": "taken", "launch": "▶ Starten", "search_emoji": "🔍 Zoeken…", "chrono": "timer", "no_routines": "Geen routines.", "create_one": "Maak er een!"}}, "zh": {"name": "中文", "flag": "🇨🇳", "dir": "ltr", "translations": {"my_routines": "我的日程", "create": "创建日程", "new_routine": "新建日程", "edit_routine": "编辑日程", "routine_name": "名称", "routine_emoji": "日程表情", "tasks": "任务", "add_task": "＋ 添加任务", "cancel": "取消", "save": "保存", "task_title": "任务标题", "task_desc": "说明", "task_emoji": "表情", "task_color": "背景颜色", "task_font": "字体", "task_italic": "斜体", "task_timer": "计时器", "task_timer_on": "启用计时器", "task_minutes": "分钟", "done": "✓ 完成！", "skip": "跳过", "congrats": "太棒了！", "tasks_done": "任务已完成！", "back": "返回", "empty": "暂无日程\n创建一个吧！", "delete_confirm": "删除", "n_tasks": "任务", "n_tasks_pl": "任务", "launch": "▶ 开始", "search_emoji": "🔍 搜索…", "chrono": "计时", "no_routines": "暂无日程", "create_one": "创建一个吧！"}}, "ko": {"name": "한국어", "flag": "🇰🇷", "dir": "ltr", "translations": {"my_routines": "내 루틴", "create": "루틴 만들기", "new_routine": "새 루틴", "edit_routine": "루틴 수정", "routine_name": "이름", "routine_emoji": "루틴 이모지", "tasks": "할 일", "add_task": "＋ 할 일 추가", "cancel": "취소", "save": "저장", "task_title": "할 일 제목", "task_desc": "설명", "task_emoji": "이모지", "task_color": "배경 색상", "task_font": "폰트", "task_italic": "기울임", "task_timer": "타이머", "task_timer_on": "타이머 활성화", "task_minutes": "분", "done": "✓ 완료!", "skip": "건너뛰기", "congrats": "잘했어요!", "tasks_done": "할 일 완료!", "back": "루틴으로 돌아가기", "empty": "루틴이 없습니다\n만들어보세요!", "delete_confirm": "삭제", "n_tasks": "개", "n_tasks_pl": "개", "launch": "▶ 시작", "search_emoji": "🔍 검색…", "chrono": "타이머", "no_routines": "루틴이 없습니다", "create_one": "만들어보세요!"}}, "th": {"name": "ไทย", "flag": "🇹🇭", "dir": "ltr", "translations": {"my_routines": "กิจวัตรของฉัน", "create": "สร้างกิจวัตร", "new_routine": "กิจวัตรใหม่", "edit_routine": "แก้ไขกิจวัตร", "routine_name": "ชื่อ", "routine_emoji": "อีโมจิ", "tasks": "งาน", "add_task": "＋ เพิ่มงาน", "cancel": "ยกเลิก", "save": "บันทึก", "task_title": "ชื่องาน", "task_desc": "คำอธิบาย", "task_emoji": "อีโมจิ", "task_color": "สีพื้นหลัง", "task_font": "แบบอักษร", "task_italic": "ตัวเอียง", "task_timer": "ตัวจับเวลา", "task_timer_on": "เปิดใช้ตัวจับเวลา", "task_minutes": "นาที", "done": "✓ เสร็จแล้ว!", "skip": "ข้าม", "congrats": "เยี่ยมมาก!", "tasks_done": "งานเสร็จแล้ว!", "back": "กลับ", "empty": "ยังไม่มีกิจวัตร\nสร้างเลย!", "delete_confirm": "ลบ", "n_tasks": "งาน", "n_tasks_pl": "งาน", "launch": "▶ เริ่ม", "search_emoji": "🔍 ค้นหา…", "chrono": "จับเวลา", "no_routines": "ยังไม่มีกิจวัตร", "create_one": "สร้างเลย!"}}, "hi": {"name": "हिन्दी", "flag": "🇮🇳", "dir": "ltr", "translations": {"my_routines": "मेरी दिनचर्या", "create": "दिनचर्या बनाएं", "new_routine": "नई दिनचर्या", "edit_routine": "दिनचर्या संपादित करें", "routine_name": "नाम", "routine_emoji": "इमोजी", "tasks": "कार्य", "add_task": "＋ कार्य जोड़ें", "cancel": "रद्द करें", "save": "सहेजें", "task_title": "कार्य शीर्षक", "task_desc": "विवरण", "task_emoji": "इमोजी", "task_color": "पृष्ठभूमि रंग", "task_font": "फ़ॉन्ट", "task_italic": "तिरछा", "task_timer": "टाइमर", "task_timer_on": "टाइमर सक्रिय करें", "task_minutes": "मिनट", "done": "✓ हो गया!", "skip": "छोड़ें", "congrats": "शाबाश!", "tasks_done": "कार्य पूर्ण!", "back": "वापस जाएं", "empty": "कोई दिनचर्या नहीं\nबनाएं!", "delete_confirm": "हटाएं", "n_tasks": "कार्य", "n_tasks_pl": "कार्य", "launch": "▶ शुरू", "search_emoji": "🔍 खोजें…", "chrono": "टाइमर", "no_routines": "कोई दिनचर्या नहीं", "create_one": "बनाएं!"}}, "ar": {"name": "العربية", "flag": "🇸🇦", "dir": "rtl", "translations": {"my_routines": "روتيناتي", "create": "إنشاء روتين", "new_routine": "روتين جديد", "edit_routine": "تعديل الروتين", "routine_name": "الاسم", "routine_emoji": "إيموجي الروتين", "tasks": "المهام", "add_task": "＋ إضافة مهمة", "cancel": "إلغاء", "save": "حفظ", "task_title": "عنوان المهمة", "task_desc": "الوصف", "task_emoji": "إيموجي", "task_color": "لون الخلفية", "task_font": "الخط", "task_italic": "مائل", "task_timer": "مؤقت", "task_timer_on": "تفعيل المؤقت", "task_minutes": "دقائق", "done": "✓ تم!", "skip": "تخطي", "congrats": "أحسنت!", "tasks_done": "مهمة مكتملة!", "back": "رجوع", "empty": "لا يوجد روتين\nأنشئ واحداً!", "delete_confirm": "حذف", "n_tasks": "مهمة", "n_tasks_pl": "مهام", "launch": "▶ ابدأ", "search_emoji": "🔍 بحث…", "chrono": "مؤقت", "no_routines": "لا يوجد روتين", "create_one": "أنشئ واحداً!"}}};
+const LANGS={"en": {"name": "English", "flag": "🇬🇧", "dir": "ltr", "translations": {"my_routines": "My routines", "create": "Create a routine", "new_routine": "New routine", "edit_routine": "Edit routine", "routine_name": "Name", "routine_emoji": "Routine emoji", "tasks": "Tasks", "add_task": "＋ Add a task", "cancel": "Cancel", "save": "Save", "task_title": "Task title", "task_desc": "Description", "task_emoji": "Emoji", "task_color": "Background color", "task_font": "Font", "task_italic": "Italic", "task_timer": "Timer", "task_timer_on": "Enable a timer", "task_minutes": "minutes", "done": "✓ Done!", "skip": "Skip", "congrats": "Well done!", "tasks_done": "task(s) completed!", "back": "Back to routines", "empty": "No routines yet.\nCreate one!", "delete_confirm": "Delete", "n_tasks": "task", "n_tasks_pl": "tasks", "launch": "▶ Launch", "search_emoji": "🔍 Search…", "chrono": "timer", "no_routines": "No routines.", "create_one": "Create one!","alarm_on": "Enable an alarm for this routine"}}, "fr": {"name": "Français", "flag": "🇫🇷", "dir": "ltr", "translations": {"my_routines": "Mes routines", "create": "Créer une routine", "new_routine": "Nouvelle routine", "edit_routine": "Modifier la routine", "routine_name": "Nom", "routine_emoji": "Emoji de la routine", "tasks": "Tâches", "add_task": "＋ Ajouter une tâche", "cancel": "Annuler", "save": "Enregistrer", "task_title": "Titre de la tâche", "task_desc": "Description", "task_emoji": "Emoji", "task_color": "Couleur de fond", "task_font": "Typographie", "task_italic": "Italique", "task_timer": "Chronomètre", "task_timer_on": "Activer un chrono", "task_minutes": "minutes", "done": "✓ C'est fait !", "skip": "Passer", "congrats": "Bravo !", "tasks_done": "tâche(s) accomplie(s) !", "back": "Retour aux routines", "empty": "Aucune routine.\nCréez-en une !", "delete_confirm": "Supprimer", "n_tasks": "tâche", "n_tasks_pl": "tâches", "launch": "▶ Lancer", "search_emoji": "🔍 Rechercher…", "chrono": "chrono", "no_routines": "Aucune routine.", "create_one": "Créez-en une !","alarm_on": "Activer une alarme pour cette routine"}}, "es": {"name": "Español", "flag": "🇪🇸", "dir": "ltr", "translations": {"my_routines": "Mis rutinas", "create": "Crear rutina", "new_routine": "Nueva rutina", "edit_routine": "Editar rutina", "routine_name": "Nombre", "routine_emoji": "Emoji rutina", "tasks": "Tareas", "add_task": "＋ Añadir tarea", "cancel": "Cancelar", "save": "Guardar", "task_title": "Título", "task_desc": "Descripción", "task_emoji": "Emoji", "task_color": "Color de fondo", "task_font": "Tipografía", "task_italic": "Cursiva", "task_timer": "Cronómetro", "task_timer_on": "Activar cronómetro", "task_minutes": "minutos", "done": "✓ ¡Hecho!", "skip": "Saltar", "congrats": "¡Bravo!", "tasks_done": "tarea(s) completada(s)", "back": "Volver", "empty": "Sin rutinas.\n¡Crea una!", "delete_confirm": "Eliminar", "n_tasks": "tarea", "n_tasks_pl": "tareas", "launch": "▶ Iniciar", "search_emoji": "🔍 Buscar…", "chrono": "crono", "no_routines": "Sin rutinas.", "create_one": "¡Crea una!","alarm_on": "Activar una alarma para esta rutina"}}, "de": {"name": "Deutsch", "flag": "🇩🇪", "dir": "ltr", "translations": {"my_routines": "Meine Routinen", "create": "Routine erstellen", "new_routine": "Neue Routine", "edit_routine": "Routine bearbeiten", "routine_name": "Name", "routine_emoji": "Routine-Emoji", "tasks": "Aufgaben", "add_task": "＋ Aufgabe hinzufügen", "cancel": "Abbrechen", "save": "Speichern", "task_title": "Aufgabentitel", "task_desc": "Beschreibung", "task_emoji": "Emoji", "task_color": "Hintergrundfarbe", "task_font": "Schriftart", "task_italic": "Kursiv", "task_timer": "Timer", "task_timer_on": "Timer aktivieren", "task_minutes": "Minuten", "done": "✓ Fertig!", "skip": "Überspringen", "congrats": "Bravo!", "tasks_done": "Aufgabe(n) erledigt!", "back": "Zurück", "empty": "Keine Routinen.\nErstelle eine!", "delete_confirm": "Löschen", "n_tasks": "Aufgabe", "n_tasks_pl": "Aufgaben", "launch": "▶ Starten", "search_emoji": "🔍 Suchen…", "chrono": "Timer", "no_routines": "Keine Routinen.", "create_one": "Erstelle eine!","alarm_on": "Alarm für diese Routine aktivieren"}}, "it": {"name": "Italiano", "flag": "🇮🇹", "dir": "ltr", "translations": {"my_routines": "Le mie routine", "create": "Crea routine", "new_routine": "Nuova routine", "edit_routine": "Modifica routine", "routine_name": "Nome", "routine_emoji": "Emoji routine", "tasks": "Attività", "add_task": "＋ Aggiungi attività", "cancel": "Annulla", "save": "Salva", "task_title": "Titolo attività", "task_desc": "Descrizione", "task_emoji": "Emoji", "task_color": "Colore sfondo", "task_font": "Tipografia", "task_italic": "Corsivo", "task_timer": "Timer", "task_timer_on": "Attiva timer", "task_minutes": "minuti", "done": "✓ Fatto!", "skip": "Salta", "congrats": "Bravo!", "tasks_done": "attività completata/e!", "back": "Torna", "empty": "Nessuna routine.\nCreane una!", "delete_confirm": "Elimina", "n_tasks": "attività", "n_tasks_pl": "attività", "launch": "▶ Avvia", "search_emoji": "🔍 Cerca…", "chrono": "timer", "no_routines": "Nessuna routine.", "create_one": "Creane una!","alarm_on": "Attiva un allarme per questa routine"}}, "pt": {"name": "Português", "flag": "🇵🇹", "dir": "ltr", "translations": {"my_routines": "Minhas rotinas", "create": "Criar rotina", "new_routine": "Nova rotina", "edit_routine": "Editar rotina", "routine_name": "Nome", "routine_emoji": "Emoji da rotina", "tasks": "Tarefas", "add_task": "＋ Adicionar tarefa", "cancel": "Cancelar", "save": "Guardar", "task_title": "Título da tarefa", "task_desc": "Descrição", "task_emoji": "Emoji", "task_color": "Cor de fundo", "task_font": "Tipografia", "task_italic": "Itálico", "task_timer": "Cronómetro", "task_timer_on": "Ativar cronómetro", "task_minutes": "minutos", "done": "✓ Feito!", "skip": "Saltar", "congrats": "Parabéns!", "tasks_done": "tarefa(s) concluída(s)!", "back": "Voltar", "empty": "Sem rotinas.\nCrie uma!", "delete_confirm": "Eliminar", "n_tasks": "tarefa", "n_tasks_pl": "tarefas", "launch": "▶ Iniciar", "search_emoji": "🔍 Pesquisar…", "chrono": "crono", "no_routines": "Sem rotinas.", "create_one": "Crie uma!","alarm_on": "Ativar um alarme para esta rotina"}}, "nl": {"name": "Nederlands", "flag": "🇳🇱", "dir": "ltr", "translations": {"my_routines": "Mijn routines", "create": "Routine maken", "new_routine": "Nieuwe routine", "edit_routine": "Routine bewerken", "routine_name": "Naam", "routine_emoji": "Routine-emoji", "tasks": "Taken", "add_task": "＋ Taak toevoegen", "cancel": "Annuleren", "save": "Opslaan", "task_title": "Taaknaam", "task_desc": "Omschrijving", "task_emoji": "Emoji", "task_color": "Achtergrondkleur", "task_font": "Lettertype", "task_italic": "Cursief", "task_timer": "Timer", "task_timer_on": "Timer inschakelen", "task_minutes": "minuten", "done": "✓ Klaar!", "skip": "Overslaan", "congrats": "Geweldig!", "tasks_done": "taak/taken voltooid!", "back": "Terug", "empty": "Geen routines.\nMaak er een!", "delete_confirm": "Verwijderen", "n_tasks": "taak", "n_tasks_pl": "taken", "launch": "▶ Starten", "search_emoji": "🔍 Zoeken…", "chrono": "timer", "no_routines": "Geen routines.", "create_one": "Maak er een!","alarm_on": "Alarm inschakelen voor deze routine"}}, "zh": {"name": "中文", "flag": "🇨🇳", "dir": "ltr", "translations": {"my_routines": "我的日程", "create": "创建日程", "new_routine": "新建日程", "edit_routine": "编辑日程", "routine_name": "名称", "routine_emoji": "日程表情", "tasks": "任务", "add_task": "＋ 添加任务", "cancel": "取消", "save": "保存", "task_title": "任务标题", "task_desc": "说明", "task_emoji": "表情", "task_color": "背景颜色", "task_font": "字体", "task_italic": "斜体", "task_timer": "计时器", "task_timer_on": "启用计时器", "task_minutes": "分钟", "done": "✓ 完成！", "skip": "跳过", "congrats": "太棒了！", "tasks_done": "任务已完成！", "back": "返回", "empty": "暂无日程\n创建一个吧！", "delete_confirm": "删除", "n_tasks": "任务", "n_tasks_pl": "任务", "launch": "▶ 开始", "search_emoji": "🔍 搜索…", "chrono": "计时", "no_routines": "暂无日程", "create_one": "创建一个吧！","alarm_on": "为此日程启用闹钟"}}, "ko": {"name": "한국어", "flag": "🇰🇷", "dir": "ltr", "translations": {"my_routines": "내 루틴", "create": "루틴 만들기", "new_routine": "새 루틴", "edit_routine": "루틴 수정", "routine_name": "이름", "routine_emoji": "루틴 이모지", "tasks": "할 일", "add_task": "＋ 할 일 추가", "cancel": "취소", "save": "저장", "task_title": "할 일 제목", "task_desc": "설명", "task_emoji": "이모지", "task_color": "배경 색상", "task_font": "폰트", "task_italic": "기울임", "task_timer": "타이머", "task_timer_on": "타이머 활성화", "task_minutes": "분", "done": "✓ 완료!", "skip": "건너뛰기", "congrats": "잘했어요!", "tasks_done": "할 일 완료!", "back": "루틴으로 돌아가기", "empty": "루틴이 없습니다\n만들어보세요!", "delete_confirm": "삭제", "n_tasks": "개", "n_tasks_pl": "개", "launch": "▶ 시작", "search_emoji": "🔍 검색…", "chrono": "타이머", "no_routines": "루틴이 없습니다", "create_one": "만들어보세요!","alarm_on": "이 루틴에 알람 활성화"}}, "th": {"name": "ไทย", "flag": "🇹🇭", "dir": "ltr", "translations": {"my_routines": "กิจวัตรของฉัน", "create": "สร้างกิจวัตร", "new_routine": "กิจวัตรใหม่", "edit_routine": "แก้ไขกิจวัตร", "routine_name": "ชื่อ", "routine_emoji": "อีโมจิ", "tasks": "งาน", "add_task": "＋ เพิ่มงาน", "cancel": "ยกเลิก", "save": "บันทึก", "task_title": "ชื่องาน", "task_desc": "คำอธิบาย", "task_emoji": "อีโมจิ", "task_color": "สีพื้นหลัง", "task_font": "แบบอักษร", "task_italic": "ตัวเอียง", "task_timer": "ตัวจับเวลา", "task_timer_on": "เปิดใช้ตัวจับเวลา", "task_minutes": "นาที", "done": "✓ เสร็จแล้ว!", "skip": "ข้าม", "congrats": "เยี่ยมมาก!", "tasks_done": "งานเสร็จแล้ว!", "back": "กลับ", "empty": "ยังไม่มีกิจวัตร\nสร้างเลย!", "delete_confirm": "ลบ", "n_tasks": "งาน", "n_tasks_pl": "งาน", "launch": "▶ เริ่ม", "search_emoji": "🔍 ค้นหา…", "chrono": "จับเวลา", "no_routines": "ยังไม่มีกิจวัตร", "create_one": "สร้างเลย!","alarm_on": "เปิดใช้การแจ้งเตือนสำหรับกิจวัตรนี้"}}, "hi": {"name": "हिन्दी", "flag": "🇮🇳", "dir": "ltr", "translations": {"my_routines": "मेरी दिनचर्या", "create": "दिनचर्या बनाएं", "new_routine": "नई दिनचर्या", "edit_routine": "दिनचर्या संपादित करें", "routine_name": "नाम", "routine_emoji": "इमोजी", "tasks": "कार्य", "add_task": "＋ कार्य जोड़ें", "cancel": "रद्द करें", "save": "सहेजें", "task_title": "कार्य शीर्षक", "task_desc": "विवरण", "task_emoji": "इमोजी", "task_color": "पृष्ठभूमि रंग", "task_font": "फ़ॉन्ट", "task_italic": "तिरछा", "task_timer": "टाइमर", "task_timer_on": "टाइमर सक्रिय करें", "task_minutes": "मिनट", "done": "✓ हो गया!", "skip": "छोड़ें", "congrats": "शाबाश!", "tasks_done": "कार्य पूर्ण!", "back": "वापस जाएं", "empty": "कोई दिनचर्या नहीं\nबनाएं!", "delete_confirm": "हटाएं", "n_tasks": "कार्य", "n_tasks_pl": "कार्य", "launch": "▶ शुरू", "search_emoji": "🔍 खोजें…", "chrono": "टाइमर", "no_routines": "कोई दिनचर्या नहीं", "create_one": "बनाएं!","alarm_on": "इस दिनचर्या के लिए अलार्म सक्रिय करें"}}, "ar": {"name": "العربية", "flag": "🇸🇦", "dir": "rtl", "translations": {"my_routines": "روتيناتي", "create": "إنشاء روتين", "new_routine": "روتين جديد", "edit_routine": "تعديل الروتين", "routine_name": "الاسم", "routine_emoji": "إيموجي الروتين", "tasks": "المهام", "add_task": "＋ إضافة مهمة", "cancel": "إلغاء", "save": "حفظ", "task_title": "عنوان المهمة", "task_desc": "الوصف", "task_emoji": "إيموجي", "task_color": "لون الخلفية", "task_font": "الخط", "task_italic": "مائل", "task_timer": "مؤقت", "task_timer_on": "تفعيل المؤقت", "task_minutes": "دقائق", "done": "✓ تم!", "skip": "تخطي", "congrats": "أحسنت!", "tasks_done": "مهمة مكتملة!", "back": "رجوع", "empty": "لا يوجد روتين\nأنشئ واحداً!", "delete_confirm": "حذف", "n_tasks": "مهمة", "n_tasks_pl": "مهام", "launch": "▶ ابدأ", "search_emoji": "🔍 بحث…", "chrono": "مؤقت", "no_routines": "لا يوجد روتين", "create_one": "أنشئ واحداً!","alarm_on": "تفعيل منبّه لهذا الروتين"}}};
 
 let T = {}; // current translations — starts empty, filled by setLang()
 
@@ -1029,6 +964,9 @@ function setLang(code) {
   if(lblRemoji) lblRemoji.textContent = T.routine_emoji || 'Routine emoji';
   const lblTasks = document.getElementById('lbl-tasks');
   if(lblTasks) lblTasks.textContent = T.tasks || 'Tasks';
+  // Alarm label
+  const alarmOnLabel = document.getElementById('alarm-on-label');
+  if(alarmOnLabel) alarmOnLabel.textContent = T.alarm_on || 'Enable an alarm for this routine';
   render();
 }
 
@@ -1077,85 +1015,11 @@ showComplete = function() {
   if(backBtn) backBtn.textContent = T.back || 'Back';
 };
 
-// ── ROUTINE EMOJI PICKER ──────────────────────────────
-(function initREPicker(){
-  const inp    = document.getElementById('re');
-  const display= document.getElementById('re-display');
-  const catBar = document.getElementById('re-catbar');
-  const grid   = document.getElementById('re-grid');
-  const search = document.getElementById('re-search');
-  if(!inp||!catBar||!grid) return;
-  let activeCat=0;
-
-  // Reuse EMOJI_CATS from addTask scope — build a flat list
-  const ECAT=[
-    {l:'😀',e:['😀','😂','🥰','😎','🤩','😴','🤔','😅','🥳','😇','🤗','😤','🥺','😜','🤯','😱','🤖','👻','💀','😈','🤡','👾','😺','😸']},
-    {l:'🏠',e:['🏠','🛏','🛁','🚿','🪣','🧹','🧽','🧴','🪥','🧺','🪟','🚪','🛋','🪑','🖼','💡','🕯','🧸','🪴','🗑','🧱','🔑','🛒','🪞']},
-    {l:'🍎',e:['🍎','🥑','🥗','🍳','☕','🍵','🥤','🧃','🍕','🥪','🍜','🥞','🍇','🍓','🍋','🥕','🧄','🫐','🍰','🍫','🍺','🍷','🥂','🎂']},
-    {l:'💪',e:['💪','🏃','🧘','🚴','🏋','🤸','🧗','🏊','⚽','🎯','🎾','🥊','🏆','🥇','🎽','🧢','👟','🏅','🥅','🎿','🏄','🤽','🚣','🥋']},
-    {l:'📚',e:['📚','📖','✏️','📝','📋','📌','📎','🗂','💻','⌨️','🖥','📊','📈','🗓','⏰','⏱','🔔','💡','🧠','🎯','📱','🖊','📓','📐']},
-    {l:'🌿',e:['🌿','🌸','🌻','🍀','🌈','☀️','🌙','⭐','🌊','🔥','❄️','🌱','🦋','🐝','🐶','🐱','🌴','🍃','🌺','🦊','🐸','🌵','🌾','🍂']},
-    {l:'✨',e:['✨','🎉','🎊','💎','🔮','🪄','🎭','🎨','🎵','🎸','🎤','🎬','🚀','💌','🪐','🌟','💫','🎁','💖','❤️','🧡','💛','💚','💙']},
-    {l:'🚗',e:['🚗','✈️','🚀','🚂','⛵','🚁','🛺','🏎','🛵','🚲','🛴','🛹','🚢','🚑','🚒','🚓','🛻','🚐','🚌','🚎','⛽','🗺','🏔','🌍']},
-  ];
-
-  function addBtn(em){
-    const btn=document.createElement('button');
-    btn.type='button';
-    btn.style.cssText='background:none;border:none;font-size:1.35rem;cursor:pointer;padding:.25rem;border-radius:8px;transition:background .15s;line-height:1';
-    btn.textContent=em;
-    btn.addEventListener('mouseenter',()=>btn.style.background='var(--acc-l)');
-    btn.addEventListener('mouseleave',()=>btn.style.background='none');
-    btn.addEventListener('click',()=>{
-      inp.value=em; display.textContent=em;
-      search.value=''; showCat(activeCat);
-      pickerBox.style.display='none'; // close after selection
-    });
-    grid.appendChild(btn);
-  }
-
-  // Picker box — hidden by default
-  const pickerBox=document.createElement('div');
-  pickerBox.style.display='none';
-  pickerBox.appendChild(search);
-  pickerBox.appendChild(catBar);
-  pickerBox.appendChild(grid);
-
-  // Toggle on click of the display square
-  display.style.cursor='pointer';
-  display.title='Choose an emoji';
-  display.addEventListener('click',()=>{
-    pickerBox.style.display=pickerBox.style.display==='none'?'block':'none';
-  });
-
-  function showCat(idx){
-    activeCat=idx;
-    catBar.querySelectorAll('.recatbtn').forEach((b,i)=>b.style.background=i===idx?'var(--acc-l)':'var(--bg)');
-    grid.innerHTML='';
-    ECAT[idx].e.forEach(em=>addBtn(em));
-  }
-
-  ECAT.forEach((cat,i)=>{
-    const tab=document.createElement('button');
-    tab.type='button'; tab.className='recatbtn';
-    tab.style.cssText='background:var(--bg);border:none;font-size:1.1rem;cursor:pointer;padding:.3rem .4rem;border-radius:8px;flex-shrink:0;transition:background .15s';
-    tab.textContent=cat.l;
-    tab.addEventListener('click',()=>showCat(i));
-    catBar.appendChild(tab);
-  });
-  showCat(0);
-
-  inp.addEventListener('input',()=>{ display.textContent=inp.value||'📋'; });
-  search.addEventListener('input',()=>{
-    grid.innerHTML='';
-    if(!search.value.trim()){ showCat(activeCat); return; }
-    ECAT.flatMap(c=>c.e).forEach(em=>addBtn(em));
-  });
-
-  // Append pickerBox to the wrap div (after the display+input row)
-  const wrap=document.getElementById('re-wrap');
-  if(wrap) wrap.appendChild(pickerBox);
-})();
+// ── ROUTINE EMOJI — sync display with input ──────────
+document.getElementById('re').addEventListener('input', function(){
+  const display = document.getElementById('re-display');
+  if(display) display.textContent = this.value || '📋';
+});
 
 // ── INIT LANG ──────────────────────────────────────
 (function initLang() {
