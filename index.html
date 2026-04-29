@@ -162,29 +162,30 @@ textarea.finp{resize:vertical;min-height:68px}
     </div>
     <div class="sep"></div>
     <div class="fg" id="alarm-section">
-      <span class="lb">⏰ Alarm</span>
+      <span class="lb" id="alarm-section-label">⏰ Alarm</span>
       <label class="chk-lbl" style="margin-bottom:.6rem">
         <input type="checkbox" id="alarm-on"> <span id="alarm-on-label">Enable an alarm for this routine</span>
       </label>
       <div id="alarm-settings" style="display:none;background:var(--bg);border-radius:12px;padding:.9rem;display:none;flex-direction:column;gap:.8rem">
         <!-- Time + countdown before -->
         <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
-          <span style="font-size:.82rem;color:var(--ink-l);min-width:60px">Time</span>
+          <span class="alarm-time-label" style="font-size:.82rem;color:var(--ink-l);min-width:60px">Time</span>
           <input type="time" id="alarm-time" value="08:00" class="finp" style="width:130px">
+          <span class="alarm-before-label" style="font-size:.82rem;color:var(--ink-l)">Countdown</span>
           <input type="number" id="alarm-before" min="0" max="24" value="2" style="width:55px;padding:.35rem .5rem;border:2px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;text-align:center;outline:none">
-          <span style="font-size:.82rem;color:var(--ink-l)">h before countdown</span>
+          <span style="font-size:.82rem;color:var(--ink-l)">h</span>
         </div>
         <!-- Days -->
         <div>
-          <div style="font-size:.82rem;color:var(--ink-l);margin-bottom:.4rem">Days</div>
+          <div id="alarm-days-label" style="font-size:.82rem;color:var(--ink-l);margin-bottom:.4rem">Days</div>
           <div style="display:flex;gap:.35rem;flex-wrap:wrap" id="alarm-days">
-            <button type="button" class="day-btn" data-d="1">Mon</button>
-            <button type="button" class="day-btn" data-d="2">Tue</button>
-            <button type="button" class="day-btn" data-d="3">Wed</button>
-            <button type="button" class="day-btn" data-d="4">Thu</button>
-            <button type="button" class="day-btn" data-d="5">Fri</button>
-            <button type="button" class="day-btn" data-d="6">Sat</button>
-            <button type="button" class="day-btn" data-d="0">Sun</button>
+            <button type="button" class="day-btn" data-d="1" id="day-1">Mon</button>
+            <button type="button" class="day-btn" data-d="2" id="day-2">Tue</button>
+            <button type="button" class="day-btn" data-d="3" id="day-3">Wed</button>
+            <button type="button" class="day-btn" data-d="4" id="day-4">Thu</button>
+            <button type="button" class="day-btn" data-d="5" id="day-5">Fri</button>
+            <button type="button" class="day-btn" data-d="6" id="day-6">Sat</button>
+            <button type="button" class="day-btn" data-d="0" id="day-0">Sun</button>
           </div>
         </div>
       </div>
@@ -206,18 +207,18 @@ textarea.finp{resize:vertical;min-height:68px}
 <div id="paywall-screen" class="hidden" style="position:fixed;inset:0;z-index:800;background:rgba(8,0,22,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1.5rem">
   <div style="background:#fff;border-radius:28px;padding:2.5rem 2rem;max-width:360px;width:100%;text-align:center;box-shadow:0 28px 80px rgba(0,0,0,.3)">
     <div style="font-size:3rem;margin-bottom:.8rem">✨</div>
-    <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:.5rem">Go Premium</div>
-    <div id="paywall-msg" style="font-size:.9rem;color:var(--ink-l);margin-bottom:1.5rem;line-height:1.5">Unlock unlimited routines and tasks.</div>
+    <div id="pw-title" style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:.5rem">Go Premium</div>
+    <div id="paywall-msg" style="font-size:.9rem;color:var(--ink-l);margin-bottom:1.5rem;line-height:1.5"><span id='pw-unlock'>Unlock unlimited routines and tasks.</span></div>
     <div style="background:var(--bg);border-radius:14px;padding:1rem;margin-bottom:1.5rem;text-align:left">
-      <div style="font-size:.85rem;margin-bottom:.5rem;font-weight:600">Premium includes:</div>
+      <div id="pw-includes" style="font-size:.85rem;margin-bottom:.5rem;font-weight:600">Premium includes:</div>
       <div style="font-size:.82rem;color:var(--ink-l);line-height:1.8">
-        ✅ Unlimited routines<br>
-        ✅ Unlimited tasks per routine<br>
-        ✅ Priority support<br>
-        ✅ All future features
+        ✅ <span id="pw-f1">Unlimited routines</span><br>
+        ✅ <span id="pw-f2">Unlimited tasks per routine</span><br>
+        ✅ <span id="pw-f3">Priority support</span><br>
+        ✅ <span id="pw-f4">All future features</span>
       </div>
     </div>
-    <button onclick="handlePremiumPurchase()" style="width:100%;padding:.9rem;background:var(--ink);color:#fff;border:none;border-radius:14px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;margin-bottom:.7rem;transition:background .2s" onmouseover="this.style.background='var(--acc)'" onmouseout="this.style.background='var(--ink)'">
+    <button id="pw-btn" onclick="handlePremiumPurchase()" style="width:100%;padding:.9rem;background:var(--ink);color:#fff;border:none;border-radius:14px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;margin-bottom:.7rem;transition:background .2s" onmouseover="this.style.background='var(--acc)'" onmouseout="this.style.background='var(--ink)'">
       🚀 Upgrade — €1.99 / month
     </button>
     <!-- Promo code -->
@@ -228,7 +229,7 @@ textarea.finp{resize:vertical;min-height:68px}
       </div>
       <div id="promo-msg" style="font-size:.75rem;color:#c00;margin-top:.3rem;min-height:1rem"></div>
     </div>
-    <button onclick="hidePaywall()" style="width:100%;padding:.7rem;background:none;border:none;color:var(--ink-l);font-family:'DM Sans',sans-serif;cursor:pointer;font-size:.88rem">
+    <button id="pw-later" onclick="hidePaywall()" style="width:100%;padding:.7rem;background:none;border:none;color:var(--ink-l);font-family:'DM Sans',sans-serif;cursor:pointer;font-size:.88rem">
       Maybe later
     </button>
   </div>
@@ -619,8 +620,8 @@ function showPaywall(reason){
   document.getElementById('promo-input').value='';
   document.getElementById('promo-msg').textContent='';
   const msg = document.getElementById('paywall-msg');
-  if(reason==='routines') msg.textContent=(T.paywall_routines||'Free version is limited to 2 routines.');
-  else msg.textContent=(T.paywall_tasks||'Free version is limited to 5 tasks per routine.');
+  if(reason==='routines') msg.textContent=(T.premium_msg_routines||'Free version is limited to 2 routines.');
+  else msg.textContent=(T.premium_msg_tasks||'Free version is limited to 5 tasks per routine.');
 }
 function hidePaywall(){
   const el=document.getElementById('paywall-screen');
@@ -636,11 +637,11 @@ function applyPromo(){
   if(PROMO_CODES.includes(code)){
     unlockPremium();
     msg.style.color='#00C853';
-    msg.textContent='✅ Premium unlocked!';
+    msg.textContent=T.premium_unlocked||'✅ Premium unlocked!';
     setTimeout(()=>{ hidePaywall(); render(); }, 1200);
   } else {
     msg.style.color='#c00';
-    msg.textContent='❌ Invalid code.';
+    msg.textContent=T.premium_code_invalid||'❌ Invalid code.';
   }
 }
 
@@ -794,27 +795,95 @@ function clearTimer(){
 // ── DEMO ─────────────────────────────────────────────
 function demo(){
   if(routines.length) return;
-  routines=[
-    {name:'✨ Welcome to Habits!',emoji:'✨',tasks:[
-      {title:'👋 Welcome!',desc:'This is your first routine. Tap ▶ Launch to run it task by task. Tap Done! to move to the next step.',emoji:'👋',color:'#7C3AFF',font:'ff1',fontFam:"'Righteous',cursive",italic:false,timer:false,timerMin:5},
-      {title:'🎨 Customize everything',desc:'Each task has its own color, font and emoji. Edit this routine to try it out!',emoji:'🎨',color:'#FF3CAC',font:'ff8',fontFam:"'Pacifico',cursive",italic:false,timer:false,timerMin:5},
-      {title:'⏱ Add a timer',desc:'Enable a countdown on any task to stay focused. Perfect for workouts or study sessions!',emoji:'⏱',color:'#FF9100',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:true,timerMin:1},
-      {title:'🔔 Set an alarm',desc:'Schedule your routine at a fixed time on specific days. Edit the routine to set it up!',emoji:'🔔',color:'#00E5FF',font:'ff2',fontFam:"'Boogaloo',cursive",italic:false,timer:false,timerMin:5},
-      {title:'🚀 Create your own!',desc:'Tap + Create a routine to build your first custom routine. Enjoy up to 2 routines for free!',emoji:'🚀',color:'#00E676',font:'ff7',fontFam:"'Bangers',cursive",italic:false,timer:false,timerMin:5},
-    ],alarm:{on:false}},
-    {name:'Ménage du matin',emoji:'🌅',tasks:[
-      {title:'Faire le lit',desc:'Lisser les draps, arranger les oreillers !',emoji:'🛏️',color:'#FF3CAC',font:'ff1',fontFam:"'Righteous',cursive",italic:false,timer:false,timerMin:5},
-      {title:'Essuyer les surfaces',desc:'Passer un chiffon humide sur les plans de travail.',emoji:'🧽',color:'#00E5FF',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:true,timerMin:3},
-      {title:"Passer l'aspirateur",desc:'Salon et couloir, 5 minutes chrono.',emoji:'🧹',color:'#C8FF3E',font:'ff2',fontFam:"'Boogaloo',cursive",italic:false,timer:true,timerMin:5},
-      {title:'Vider la machine',desc:'Mettre le linge à sécher.',emoji:'🧺',color:'#FF9100',font:'ff4',fontFam:"'Syne',sans-serif",italic:false,timer:false,timerMin:5},
-    ],alarm:{on:false}},
-    {name:'Révision du soir',emoji:'📚',tasks:[
-      {title:'Relire les notes',desc:'Parcourir les notes prises dans la journée.',emoji:'📝',color:'#7C3AFF',font:'ff5',fontFam:"'Fraunces',serif",italic:true,timer:true,timerMin:10},
-      {title:'Flashcards',desc:'10 minutes de flashcards.',emoji:'🃏',color:'#00E676',font:'ff6',fontFam:"'Space Grotesk',sans-serif",italic:false,timer:true,timerMin:10},
-      {title:'Résumé en 3 points',desc:'Écrire les 3 idées clés à retenir.',emoji:'✏️',color:'#FF6D9B',font:'ff2',fontFam:"'Boogaloo',cursive",italic:false,timer:false,timerMin:5},
-    ],alarm:{on:false}},
-  ];
+  routines=[{
+    name:'🌅 Morning Rise',
+    emoji:'🌅',
+    tasks:[
+      {title:'Silence the alarm',desc:'Resist the snooze! Put your phone face down and take a deep breath.',emoji:'⏰',color:'hsl(200,80%,55%)',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:true,timerMin:1},
+      {title:'Stretch in bed',desc:'Arms up, legs long. Hold for 30 seconds. Wake up your body gently.',emoji:'🧘',color:'hsl(280,80%,55%)',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:true,timerMin:1},
+      {title:'Make your bed',desc:'Smooth the sheets, fluff the pillows. A made bed = a productive day.',emoji:'🛏️',color:'hsl(160,80%,55%)',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:true,timerMin:2},
+      {title:'Drink a glass of water',desc:'Your body is dehydrated after 8 hours of sleep. Hydrate first thing!',emoji:'💧',color:'hsl(220,80%,55%)',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:false,timerMin:5},
+      {title:'Open the curtains',desc:'Let the light in! Natural light wakes up your brain and boosts your mood.',emoji:'☀️',color:'hsl(40,80%,55%)',font:'ff3',fontFam:"'Fredoka One',cursive",italic:false,timer:false,timerMin:5},
+    ],
+    alarm:{on:false}
+  }];
   save();
+  // Show onboarding after a short delay
+  setTimeout(showOnboarding, 800);
+}
+
+// ── ONBOARDING ────────────────────────────────────────
+function showOnboarding(){
+  if(localStorage.getItem('habits_onboarded')) return;
+  localStorage.setItem('habits_onboarded','1');
+
+  const tips = [
+    {selector:'#lang-btn',        text:'🌐 Change language',         pos:'bottom'},
+    {selector:'.rc:first-child',  text:'👆 Tap Launch to start your routine!', pos:'bottom'},
+    {selector:'.rc .rc-acts',     text:'✏️ Edit   🗑 Delete',        pos:'left'},
+    {selector:'.add-btn',         text:'＋ Create your own routine', pos:'top'},
+  ];
+
+  const overlay = document.createElement('div');
+  overlay.id='onboarding-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:8000;pointer-events:none';
+
+  // Dark backdrop
+  const backdrop = document.createElement('div');
+  backdrop.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:8000;pointer-events:all';
+  backdrop.addEventListener('click', closeOnboarding);
+  overlay.appendChild(backdrop);
+
+  let currentTip = 0;
+
+  function showTip(idx){
+    // Remove previous tooltip
+    overlay.querySelectorAll('.ob-tip').forEach(e=>e.remove());
+    overlay.querySelectorAll('.ob-highlight').forEach(e=>e.remove());
+
+    if(idx >= tips.length){ closeOnboarding(); return; }
+
+    const tip = tips[idx];
+    const el = document.querySelector(tip.selector);
+    if(!el){ showTip(idx+1); return; }
+
+    const rect = el.getBoundingClientRect();
+
+    // Highlight box
+    const hl = document.createElement('div');
+    hl.className='ob-highlight';
+    hl.style.cssText=`position:fixed;left:${rect.left-6}px;top:${rect.top-6}px;width:${rect.width+12}px;height:${rect.height+12}px;border:3px solid #C8FF3E;border-radius:14px;z-index:8001;pointer-events:none;box-shadow:0 0 0 4000px rgba(0,0,0,.55);`;
+    overlay.appendChild(hl);
+
+    // Tooltip bubble
+    const bubble = document.createElement('div');
+    bubble.className='ob-tip';
+    bubble.style.cssText=`position:fixed;background:#1A1025;color:#fff;font-family:'Fredoka One',cursive;font-size:1rem;padding:.7rem 1.1rem;border-radius:14px;z-index:8002;pointer-events:all;cursor:pointer;border:2px solid #C8FF3E;max-width:220px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.4)`;
+    bubble.innerHTML = tip.text + '<div style="font-size:.72rem;margin-top:.3rem;color:#C8FF3E;font-family:DM Sans,sans-serif">' + (idx < tips.length-1 ? 'Tap to continue →' : 'Tap to finish ✓') + '</div>';
+
+    // Position tooltip
+    let top, left;
+    if(tip.pos==='bottom'){ top=rect.bottom+12; left=rect.left+rect.width/2-110; }
+    else if(tip.pos==='top'){ top=rect.top-80; left=rect.left+rect.width/2-110; }
+    else if(tip.pos==='left'){ top=rect.top+rect.height/2-30; left=rect.left-240; }
+    else { top=rect.bottom+12; left=rect.left; }
+
+    // Keep in viewport
+    left=Math.max(8,Math.min(left,window.innerWidth-228));
+    top=Math.max(8,Math.min(top,window.innerHeight-100));
+
+    bubble.style.top=top+'px';
+    bubble.style.left=left+'px';
+    bubble.addEventListener('click',(e)=>{ e.stopPropagation(); showTip(idx+1); });
+    overlay.appendChild(bubble);
+  }
+
+  function closeOnboarding(){
+    overlay.remove();
+  }
+
+  document.body.appendChild(overlay);
+  showTip(0);
 }
 
 // ── NOTIFICATIONS ───────────────────────────────────
@@ -866,8 +935,8 @@ function updateAlarmBadge(r,i){
   if(ms>beforeMs) {
     // Show scheduled time only
     const [h,m]=r.alarm.time.split(':');
-    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const dayLabels=r.alarm.days.map(d=>days[d]).join(', ');
+    const days=T.days||['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const dayLabels=r.alarm.days.map(d=>days[d===0?6:d-1]).join(', ');
     el.innerHTML='<span style="font-size:.75rem;color:var(--ink-l)">⏰ '+r.alarm.time+' · '+dayLabels+'</span>';
     return;
   }
@@ -933,7 +1002,7 @@ demo();
 // ════════════════════════════════════════
 // i18n SYSTEM
 // ════════════════════════════════════════
-const LANGS={"en": {"name": "English", "flag": "🇬🇧", "dir": "ltr", "translations": {"my_routines": "My routines", "create": "Create a routine", "new_routine": "New routine", "edit_routine": "Edit routine", "routine_name": "Name", "routine_emoji": "Routine emoji", "tasks": "Tasks", "add_task": "＋ Add a task", "cancel": "Cancel", "save": "Save", "task_title": "Task title", "task_desc": "Description", "task_emoji": "Emoji", "task_color": "Background color", "task_font": "Font", "task_italic": "Italic", "task_timer": "Timer", "task_timer_on": "Enable a timer", "task_minutes": "minutes", "done": "✓ Done!", "skip": "Skip", "congrats": "Well done!", "tasks_done": "task(s) completed!", "back": "Back to routines", "empty": "No routines yet.\nCreate one!", "delete_confirm": "Delete", "n_tasks": "task", "n_tasks_pl": "tasks", "launch": "▶ Launch", "search_emoji": "🔍 Search…", "chrono": "timer", "no_routines": "No routines.", "create_one": "Create one!","alarm_on": "Enable an alarm for this routine"}}, "fr": {"name": "Français", "flag": "🇫🇷", "dir": "ltr", "translations": {"my_routines": "Mes routines", "create": "Créer une routine", "new_routine": "Nouvelle routine", "edit_routine": "Modifier la routine", "routine_name": "Nom", "routine_emoji": "Emoji de la routine", "tasks": "Tâches", "add_task": "＋ Ajouter une tâche", "cancel": "Annuler", "save": "Enregistrer", "task_title": "Titre de la tâche", "task_desc": "Description", "task_emoji": "Emoji", "task_color": "Couleur de fond", "task_font": "Typographie", "task_italic": "Italique", "task_timer": "Chronomètre", "task_timer_on": "Activer un chrono", "task_minutes": "minutes", "done": "✓ C'est fait !", "skip": "Passer", "congrats": "Bravo !", "tasks_done": "tâche(s) accomplie(s) !", "back": "Retour aux routines", "empty": "Aucune routine.\nCréez-en une !", "delete_confirm": "Supprimer", "n_tasks": "tâche", "n_tasks_pl": "tâches", "launch": "▶ Lancer", "search_emoji": "🔍 Rechercher…", "chrono": "chrono", "no_routines": "Aucune routine.", "create_one": "Créez-en une !","alarm_on": "Activer une alarme pour cette routine"}}, "es": {"name": "Español", "flag": "🇪🇸", "dir": "ltr", "translations": {"my_routines": "Mis rutinas", "create": "Crear rutina", "new_routine": "Nueva rutina", "edit_routine": "Editar rutina", "routine_name": "Nombre", "routine_emoji": "Emoji rutina", "tasks": "Tareas", "add_task": "＋ Añadir tarea", "cancel": "Cancelar", "save": "Guardar", "task_title": "Título", "task_desc": "Descripción", "task_emoji": "Emoji", "task_color": "Color de fondo", "task_font": "Tipografía", "task_italic": "Cursiva", "task_timer": "Cronómetro", "task_timer_on": "Activar cronómetro", "task_minutes": "minutos", "done": "✓ ¡Hecho!", "skip": "Saltar", "congrats": "¡Bravo!", "tasks_done": "tarea(s) completada(s)", "back": "Volver", "empty": "Sin rutinas.\n¡Crea una!", "delete_confirm": "Eliminar", "n_tasks": "tarea", "n_tasks_pl": "tareas", "launch": "▶ Iniciar", "search_emoji": "🔍 Buscar…", "chrono": "crono", "no_routines": "Sin rutinas.", "create_one": "¡Crea una!","alarm_on": "Activar una alarma para esta rutina"}}, "de": {"name": "Deutsch", "flag": "🇩🇪", "dir": "ltr", "translations": {"my_routines": "Meine Routinen", "create": "Routine erstellen", "new_routine": "Neue Routine", "edit_routine": "Routine bearbeiten", "routine_name": "Name", "routine_emoji": "Routine-Emoji", "tasks": "Aufgaben", "add_task": "＋ Aufgabe hinzufügen", "cancel": "Abbrechen", "save": "Speichern", "task_title": "Aufgabentitel", "task_desc": "Beschreibung", "task_emoji": "Emoji", "task_color": "Hintergrundfarbe", "task_font": "Schriftart", "task_italic": "Kursiv", "task_timer": "Timer", "task_timer_on": "Timer aktivieren", "task_minutes": "Minuten", "done": "✓ Fertig!", "skip": "Überspringen", "congrats": "Bravo!", "tasks_done": "Aufgabe(n) erledigt!", "back": "Zurück", "empty": "Keine Routinen.\nErstelle eine!", "delete_confirm": "Löschen", "n_tasks": "Aufgabe", "n_tasks_pl": "Aufgaben", "launch": "▶ Starten", "search_emoji": "🔍 Suchen…", "chrono": "Timer", "no_routines": "Keine Routinen.", "create_one": "Erstelle eine!","alarm_on": "Alarm für diese Routine aktivieren"}}, "it": {"name": "Italiano", "flag": "🇮🇹", "dir": "ltr", "translations": {"my_routines": "Le mie routine", "create": "Crea routine", "new_routine": "Nuova routine", "edit_routine": "Modifica routine", "routine_name": "Nome", "routine_emoji": "Emoji routine", "tasks": "Attività", "add_task": "＋ Aggiungi attività", "cancel": "Annulla", "save": "Salva", "task_title": "Titolo attività", "task_desc": "Descrizione", "task_emoji": "Emoji", "task_color": "Colore sfondo", "task_font": "Tipografia", "task_italic": "Corsivo", "task_timer": "Timer", "task_timer_on": "Attiva timer", "task_minutes": "minuti", "done": "✓ Fatto!", "skip": "Salta", "congrats": "Bravo!", "tasks_done": "attività completata/e!", "back": "Torna", "empty": "Nessuna routine.\nCreane una!", "delete_confirm": "Elimina", "n_tasks": "attività", "n_tasks_pl": "attività", "launch": "▶ Avvia", "search_emoji": "🔍 Cerca…", "chrono": "timer", "no_routines": "Nessuna routine.", "create_one": "Creane una!","alarm_on": "Attiva un allarme per questa routine"}}, "pt": {"name": "Português", "flag": "🇵🇹", "dir": "ltr", "translations": {"my_routines": "Minhas rotinas", "create": "Criar rotina", "new_routine": "Nova rotina", "edit_routine": "Editar rotina", "routine_name": "Nome", "routine_emoji": "Emoji da rotina", "tasks": "Tarefas", "add_task": "＋ Adicionar tarefa", "cancel": "Cancelar", "save": "Guardar", "task_title": "Título da tarefa", "task_desc": "Descrição", "task_emoji": "Emoji", "task_color": "Cor de fundo", "task_font": "Tipografia", "task_italic": "Itálico", "task_timer": "Cronómetro", "task_timer_on": "Ativar cronómetro", "task_minutes": "minutos", "done": "✓ Feito!", "skip": "Saltar", "congrats": "Parabéns!", "tasks_done": "tarefa(s) concluída(s)!", "back": "Voltar", "empty": "Sem rotinas.\nCrie uma!", "delete_confirm": "Eliminar", "n_tasks": "tarefa", "n_tasks_pl": "tarefas", "launch": "▶ Iniciar", "search_emoji": "🔍 Pesquisar…", "chrono": "crono", "no_routines": "Sem rotinas.", "create_one": "Crie uma!","alarm_on": "Ativar um alarme para esta rotina"}}, "nl": {"name": "Nederlands", "flag": "🇳🇱", "dir": "ltr", "translations": {"my_routines": "Mijn routines", "create": "Routine maken", "new_routine": "Nieuwe routine", "edit_routine": "Routine bewerken", "routine_name": "Naam", "routine_emoji": "Routine-emoji", "tasks": "Taken", "add_task": "＋ Taak toevoegen", "cancel": "Annuleren", "save": "Opslaan", "task_title": "Taaknaam", "task_desc": "Omschrijving", "task_emoji": "Emoji", "task_color": "Achtergrondkleur", "task_font": "Lettertype", "task_italic": "Cursief", "task_timer": "Timer", "task_timer_on": "Timer inschakelen", "task_minutes": "minuten", "done": "✓ Klaar!", "skip": "Overslaan", "congrats": "Geweldig!", "tasks_done": "taak/taken voltooid!", "back": "Terug", "empty": "Geen routines.\nMaak er een!", "delete_confirm": "Verwijderen", "n_tasks": "taak", "n_tasks_pl": "taken", "launch": "▶ Starten", "search_emoji": "🔍 Zoeken…", "chrono": "timer", "no_routines": "Geen routines.", "create_one": "Maak er een!","alarm_on": "Alarm inschakelen voor deze routine"}}, "zh": {"name": "中文", "flag": "🇨🇳", "dir": "ltr", "translations": {"my_routines": "我的日程", "create": "创建日程", "new_routine": "新建日程", "edit_routine": "编辑日程", "routine_name": "名称", "routine_emoji": "日程表情", "tasks": "任务", "add_task": "＋ 添加任务", "cancel": "取消", "save": "保存", "task_title": "任务标题", "task_desc": "说明", "task_emoji": "表情", "task_color": "背景颜色", "task_font": "字体", "task_italic": "斜体", "task_timer": "计时器", "task_timer_on": "启用计时器", "task_minutes": "分钟", "done": "✓ 完成！", "skip": "跳过", "congrats": "太棒了！", "tasks_done": "任务已完成！", "back": "返回", "empty": "暂无日程\n创建一个吧！", "delete_confirm": "删除", "n_tasks": "任务", "n_tasks_pl": "任务", "launch": "▶ 开始", "search_emoji": "🔍 搜索…", "chrono": "计时", "no_routines": "暂无日程", "create_one": "创建一个吧！","alarm_on": "为此日程启用闹钟"}}, "ko": {"name": "한국어", "flag": "🇰🇷", "dir": "ltr", "translations": {"my_routines": "내 루틴", "create": "루틴 만들기", "new_routine": "새 루틴", "edit_routine": "루틴 수정", "routine_name": "이름", "routine_emoji": "루틴 이모지", "tasks": "할 일", "add_task": "＋ 할 일 추가", "cancel": "취소", "save": "저장", "task_title": "할 일 제목", "task_desc": "설명", "task_emoji": "이모지", "task_color": "배경 색상", "task_font": "폰트", "task_italic": "기울임", "task_timer": "타이머", "task_timer_on": "타이머 활성화", "task_minutes": "분", "done": "✓ 완료!", "skip": "건너뛰기", "congrats": "잘했어요!", "tasks_done": "할 일 완료!", "back": "루틴으로 돌아가기", "empty": "루틴이 없습니다\n만들어보세요!", "delete_confirm": "삭제", "n_tasks": "개", "n_tasks_pl": "개", "launch": "▶ 시작", "search_emoji": "🔍 검색…", "chrono": "타이머", "no_routines": "루틴이 없습니다", "create_one": "만들어보세요!","alarm_on": "이 루틴에 알람 활성화"}}, "th": {"name": "ไทย", "flag": "🇹🇭", "dir": "ltr", "translations": {"my_routines": "กิจวัตรของฉัน", "create": "สร้างกิจวัตร", "new_routine": "กิจวัตรใหม่", "edit_routine": "แก้ไขกิจวัตร", "routine_name": "ชื่อ", "routine_emoji": "อีโมจิ", "tasks": "งาน", "add_task": "＋ เพิ่มงาน", "cancel": "ยกเลิก", "save": "บันทึก", "task_title": "ชื่องาน", "task_desc": "คำอธิบาย", "task_emoji": "อีโมจิ", "task_color": "สีพื้นหลัง", "task_font": "แบบอักษร", "task_italic": "ตัวเอียง", "task_timer": "ตัวจับเวลา", "task_timer_on": "เปิดใช้ตัวจับเวลา", "task_minutes": "นาที", "done": "✓ เสร็จแล้ว!", "skip": "ข้าม", "congrats": "เยี่ยมมาก!", "tasks_done": "งานเสร็จแล้ว!", "back": "กลับ", "empty": "ยังไม่มีกิจวัตร\nสร้างเลย!", "delete_confirm": "ลบ", "n_tasks": "งาน", "n_tasks_pl": "งาน", "launch": "▶ เริ่ม", "search_emoji": "🔍 ค้นหา…", "chrono": "จับเวลา", "no_routines": "ยังไม่มีกิจวัตร", "create_one": "สร้างเลย!","alarm_on": "เปิดใช้การแจ้งเตือนสำหรับกิจวัตรนี้"}}, "hi": {"name": "हिन्दी", "flag": "🇮🇳", "dir": "ltr", "translations": {"my_routines": "मेरी दिनचर्या", "create": "दिनचर्या बनाएं", "new_routine": "नई दिनचर्या", "edit_routine": "दिनचर्या संपादित करें", "routine_name": "नाम", "routine_emoji": "इमोजी", "tasks": "कार्य", "add_task": "＋ कार्य जोड़ें", "cancel": "रद्द करें", "save": "सहेजें", "task_title": "कार्य शीर्षक", "task_desc": "विवरण", "task_emoji": "इमोजी", "task_color": "पृष्ठभूमि रंग", "task_font": "फ़ॉन्ट", "task_italic": "तिरछा", "task_timer": "टाइमर", "task_timer_on": "टाइमर सक्रिय करें", "task_minutes": "मिनट", "done": "✓ हो गया!", "skip": "छोड़ें", "congrats": "शाबाश!", "tasks_done": "कार्य पूर्ण!", "back": "वापस जाएं", "empty": "कोई दिनचर्या नहीं\nबनाएं!", "delete_confirm": "हटाएं", "n_tasks": "कार्य", "n_tasks_pl": "कार्य", "launch": "▶ शुरू", "search_emoji": "🔍 खोजें…", "chrono": "टाइमर", "no_routines": "कोई दिनचर्या नहीं", "create_one": "बनाएं!","alarm_on": "इस दिनचर्या के लिए अलार्म सक्रिय करें"}}, "ar": {"name": "العربية", "flag": "🇸🇦", "dir": "rtl", "translations": {"my_routines": "روتيناتي", "create": "إنشاء روتين", "new_routine": "روتين جديد", "edit_routine": "تعديل الروتين", "routine_name": "الاسم", "routine_emoji": "إيموجي الروتين", "tasks": "المهام", "add_task": "＋ إضافة مهمة", "cancel": "إلغاء", "save": "حفظ", "task_title": "عنوان المهمة", "task_desc": "الوصف", "task_emoji": "إيموجي", "task_color": "لون الخلفية", "task_font": "الخط", "task_italic": "مائل", "task_timer": "مؤقت", "task_timer_on": "تفعيل المؤقت", "task_minutes": "دقائق", "done": "✓ تم!", "skip": "تخطي", "congrats": "أحسنت!", "tasks_done": "مهمة مكتملة!", "back": "رجوع", "empty": "لا يوجد روتين\nأنشئ واحداً!", "delete_confirm": "حذف", "n_tasks": "مهمة", "n_tasks_pl": "مهام", "launch": "▶ ابدأ", "search_emoji": "🔍 بحث…", "chrono": "مؤقت", "no_routines": "لا يوجد روتين", "create_one": "أنشئ واحداً!","alarm_on": "تفعيل منبّه لهذا الروتين"}}};
+const LANGS={"en": {"name": "English", "flag": "🇬🇧", "dir": "ltr", "translations": {"my_routines": "My routines", "create": "Create a routine", "new_routine": "New routine", "edit_routine": "Edit routine", "routine_name": "Name", "routine_emoji": "Routine emoji", "tasks": "Tasks", "add_task": "＋ Add a task", "cancel": "Cancel", "save": "Save", "task_title": "Task title", "task_desc": "Description", "task_emoji": "Emoji", "task_color": "Background color", "task_font": "Font", "task_italic": "Italic", "task_timer": "Timer", "task_timer_on": "Enable a timer", "task_minutes": "minutes", "done": "✓ Done!", "skip": "Skip", "congrats": "Well done!", "tasks_done": "task(s) completed!", "back": "Back to routines", "empty": "No routines yet.\nCreate one!", "delete_confirm": "Delete", "n_tasks": "task", "n_tasks_pl": "tasks", "launch": "▶ Launch", "search_emoji": "🔍 Search…", "chrono": "timer", "no_routines": "No routines.", "create_one": "Create one!","alarm_on": "", "alarm_time":"Time","alarm_days_label":"Days","days":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"alarm_before":"Countdown","premium_title":"Go Premium","alarm_label":"⏰ Alarm","premium_unlock":"Unlock unlimited routines and tasks.","premium_msg_routines":"Free version is limited to 2 routines.","premium_msg_tasks":"Free version is limited to 5 tasks per routine.","premium_includes":"Premium includes:","premium_feat1":"Unlimited routines","premium_feat2":"Unlimited tasks per routine","premium_feat3":"Priority support","premium_feat4":"All future features","premium_btn":"🚀 Upgrade — €1.99 / month","premium_later":"Maybe later","premium_code_placeholder":"Promo code","premium_code_invalid":"❌ Invalid code.","premium_unlocked":"✅ Premium unlocked!", "alarm_time":"Time","alarm_before":"Countdown","premium_title":"Go Premium","premium_msg_routines":"Free version is limited to 2 routines.","premium_msg_tasks":"Free version is limited to 5 tasks per routine.","premium_includes":"Premium includes:","premium_feat1":"Unlimited routines","premium_feat2":"Unlimited tasks per routine","premium_feat3":"Priority support","premium_feat4":"All future features","premium_btn":"🚀 Upgrade — €1.99 / month","premium_later":"Maybe later","premium_code_placeholder":"Promo code","premium_code_invalid":"❌ Invalid code.","premium_unlocked":"✅ Premium unlocked!"}}, "fr": {"name": "Français", "flag": "🇫🇷", "dir": "ltr", "translations": {"my_routines": "Mes routines", "create": "Créer une routine", "new_routine": "Nouvelle routine", "edit_routine": "Modifier la routine", "routine_name": "Nom", "routine_emoji": "Emoji de la routine", "tasks": "Tâches", "add_task": "＋ Ajouter une tâche", "cancel": "Annuler", "save": "Enregistrer", "task_title": "Titre de la tâche", "task_desc": "Description", "task_emoji": "Emoji", "task_color": "Couleur de fond", "task_font": "Typographie", "task_italic": "Italique", "task_timer": "Chronomètre", "task_timer_on": "Activer un chrono", "task_minutes": "minutes", "done": "✓ C'est fait !", "skip": "Passer", "congrats": "Bravo !", "tasks_done": "tâche(s) accomplie(s) !", "back": "Retour aux routines", "empty": "Aucune routine.\nCréez-en une !", "delete_confirm": "Supprimer", "n_tasks": "tâche", "n_tasks_pl": "tâches", "launch": "▶ Lancer", "search_emoji": "🔍 Rechercher…", "chrono": "chrono", "no_routines": "Aucune routine.", "create_one": "Créez-en une !","alarm_on": "Activer une alarme pour cette routine", "alarm_time":"Heure","alarm_days_label":"Jours","days":["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"],"alarm_before":"Décompte","premium_title":"Passer Premium","alarm_label":"⏰ Alarme","premium_unlock":"Débloquez des routines et tâches illimitées.","premium_msg_routines":"La version gratuite est limitée à 2 routines.","premium_msg_tasks":"La version gratuite est limitée à 5 tâches par routine.","premium_includes":"Premium inclut :","premium_feat1":"Routines illimitées","premium_feat2":"Tâches illimitées par routine","premium_feat3":"Support prioritaire","premium_feat4":"Toutes les futures fonctionnalités","premium_btn":"🚀 S'abonner — 1,99 € / mois","premium_later":"Plus tard","premium_code_placeholder":"Code promo","premium_code_invalid":"❌ Code invalide.","premium_unlocked":"✅ Premium débloqué !"}}, "es": {"name": "Español", "flag": "🇪🇸", "dir": "ltr", "translations": {"my_routines": "Mis rutinas", "create": "Crear rutina", "new_routine": "Nueva rutina", "edit_routine": "Editar rutina", "routine_name": "Nombre", "routine_emoji": "Emoji rutina", "tasks": "Tareas", "add_task": "＋ Añadir tarea", "cancel": "Cancelar", "save": "Guardar", "task_title": "Título", "task_desc": "Descripción", "task_emoji": "Emoji", "task_color": "Color de fondo", "task_font": "Tipografía", "task_italic": "Cursiva", "task_timer": "Cronómetro", "task_timer_on": "Activar cronómetro", "task_minutes": "minutos", "done": "✓ ¡Hecho!", "skip": "Saltar", "congrats": "¡Bravo!", "tasks_done": "tarea(s) completada(s)", "back": "Volver", "empty": "Sin rutinas.\n¡Crea una!", "delete_confirm": "Eliminar", "n_tasks": "tarea", "n_tasks_pl": "tareas", "launch": "▶ Iniciar", "search_emoji": "🔍 Buscar…", "chrono": "crono", "no_routines": "Sin rutinas.", "create_one": "¡Crea una!","alarm_on": "Activar una alarma para esta rutina", "alarm_time":"Hora","alarm_before":"Cuenta atrás","alarm_days_label":"Días","days":["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],"premium_title":"Hazte Premium","alarm_label":"⏰ Alarma","premium_unlock":"Desbloquea rutinas y tareas ilimitadas.","premium_msg_routines":"La versión gratuita está limitada a 2 rutinas.","premium_msg_tasks":"La versión gratuita está limitada a 5 tareas por rutina.","premium_includes":"Premium incluye:","premium_feat1":"Rutinas ilimitadas","premium_feat2":"Tareas ilimitadas por rutina","premium_feat3":"Soporte prioritario","premium_feat4":"Todas las funciones futuras","premium_btn":"🚀 Suscribirse — 1,99 € / mes","premium_later":"Quizás luego","premium_code_placeholder":"Código promo","premium_code_invalid":"❌ Código inválido.","premium_unlocked":"✅ ¡Premium desbloqueado!"}}, "de": {"name": "Deutsch", "flag": "🇩🇪", "dir": "ltr", "translations": {"my_routines": "Meine Routinen", "create": "Routine erstellen", "new_routine": "Neue Routine", "edit_routine": "Routine bearbeiten", "routine_name": "Name", "routine_emoji": "Routine-Emoji", "tasks": "Aufgaben", "add_task": "＋ Aufgabe hinzufügen", "cancel": "Abbrechen", "save": "Speichern", "task_title": "Aufgabentitel", "task_desc": "Beschreibung", "task_emoji": "Emoji", "task_color": "Hintergrundfarbe", "task_font": "Schriftart", "task_italic": "Kursiv", "task_timer": "Timer", "task_timer_on": "Timer aktivieren", "task_minutes": "Minuten", "done": "✓ Fertig!", "skip": "Überspringen", "congrats": "Bravo!", "tasks_done": "Aufgabe(n) erledigt!", "back": "Zurück", "empty": "Keine Routinen.\nErstelle eine!", "delete_confirm": "Löschen", "n_tasks": "Aufgabe", "n_tasks_pl": "Aufgaben", "launch": "▶ Starten", "search_emoji": "🔍 Suchen…", "chrono": "Timer", "no_routines": "Keine Routinen.", "create_one": "Erstelle eine!","alarm_on": "Alarm für diese Routine aktivieren", "alarm_time":"Uhrzeit","alarm_days_label":"Tage","days":["Mo","Di","Mi","Do","Fr","Sa","So"],"alarm_before":"Countdown","premium_title":"Premium werden","alarm_label":"⏰ Alarm","premium_unlock":"Schalte unbegrenzte Routinen und Aufgaben frei.","premium_msg_routines":"Die kostenlose Version ist auf 2 Routinen begrenzt.","premium_msg_tasks":"Die kostenlose Version ist auf 5 Aufgaben pro Routine begrenzt.","premium_includes":"Premium beinhaltet:","premium_feat1":"Unbegrenzte Routinen","premium_feat2":"Unbegrenzte Aufgaben","premium_feat3":"Prioritätssupport","premium_feat4":"Alle zukünftigen Funktionen","premium_btn":"🚀 Abonnieren — 1,99 € / Monat","premium_later":"Vielleicht später","premium_code_placeholder":"Aktionscode","premium_code_invalid":"❌ Ungültiger Code.","premium_unlocked":"✅ Premium freigeschaltet!"}}, "it": {"name": "Italiano", "flag": "🇮🇹", "dir": "ltr", "translations": {"my_routines": "Le mie routine", "create": "Crea routine", "new_routine": "Nuova routine", "edit_routine": "Modifica routine", "routine_name": "Nome", "routine_emoji": "Emoji routine", "tasks": "Attività", "add_task": "＋ Aggiungi attività", "cancel": "Annulla", "save": "Salva", "task_title": "Titolo attività", "task_desc": "Descrizione", "task_emoji": "Emoji", "task_color": "Colore sfondo", "task_font": "Tipografia", "task_italic": "Corsivo", "task_timer": "Timer", "task_timer_on": "Attiva timer", "task_minutes": "minuti", "done": "✓ Fatto!", "skip": "Salta", "congrats": "Bravo!", "tasks_done": "attività completata/e!", "back": "Torna", "empty": "Nessuna routine.\nCreane una!", "delete_confirm": "Elimina", "n_tasks": "attività", "n_tasks_pl": "attività", "launch": "▶ Avvia", "search_emoji": "🔍 Cerca…", "chrono": "timer", "no_routines": "Nessuna routine.", "create_one": "Creane una!","alarm_on": "Attiva un allarme per questa routine", "alarm_time":"Orario","alarm_days_label":"Giorni","days":["Lun","Mar","Mer","Gio","Ven","Sab","Dom"],"alarm_before":"Conto alla rovescia","premium_title":"Diventa Premium","alarm_label":"⏰ Sveglia","premium_unlock":"Sblocca routine e attività illimitate.","premium_msg_routines":"La versione gratuita è limitata a 2 routine.","premium_msg_tasks":"La versione gratuita è limitata a 5 attività per routine.","premium_includes":"Premium include:","premium_feat1":"Routine illimitate","premium_feat2":"Attività illimitate","premium_feat3":"Supporto prioritario","premium_feat4":"Tutte le funzioni future","premium_btn":"🚀 Abbonati — 1,99 € / mese","premium_later":"Forse dopo","premium_code_placeholder":"Codice promo","premium_code_invalid":"❌ Codice non valido.","premium_unlocked":"✅ Premium sbloccato!"}}, "pt": {"name": "Português", "flag": "🇵🇹", "dir": "ltr", "translations": {"my_routines": "Minhas rotinas", "create": "Criar rotina", "new_routine": "Nova rotina", "edit_routine": "Editar rotina", "routine_name": "Nome", "routine_emoji": "Emoji da rotina", "tasks": "Tarefas", "add_task": "＋ Adicionar tarefa", "cancel": "Cancelar", "save": "Guardar", "task_title": "Título da tarefa", "task_desc": "Descrição", "task_emoji": "Emoji", "task_color": "Cor de fundo", "task_font": "Tipografia", "task_italic": "Itálico", "task_timer": "Cronómetro", "task_timer_on": "Ativar cronómetro", "task_minutes": "minutos", "done": "✓ Feito!", "skip": "Saltar", "congrats": "Parabéns!", "tasks_done": "tarefa(s) concluída(s)!", "back": "Voltar", "empty": "Sem rotinas.\nCrie uma!", "delete_confirm": "Eliminar", "n_tasks": "tarefa", "n_tasks_pl": "tarefas", "launch": "▶ Iniciar", "search_emoji": "🔍 Pesquisar…", "chrono": "crono", "no_routines": "Sem rotinas.", "create_one": "Crie uma!","alarm_on": "Ativar um alarme para esta rotina", "alarm_time":"Hora","alarm_before":"Contagem regressiva","alarm_days_label":"Dias","days":["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"],"premium_title":"Tornar-se Premium","alarm_label":"⏰ Alarme","premium_unlock":"Desbloqueie rotinas e tarefas ilimitadas.","premium_msg_routines":"A versão gratuita está limitada a 2 rotinas.","premium_msg_tasks":"A versão gratuita está limitada a 5 tarefas por rotina.","premium_includes":"Premium inclui:","premium_feat1":"Rotinas ilimitadas","premium_feat2":"Tarefas ilimitadas","premium_feat3":"Suporte prioritário","premium_feat4":"Todas as funcionalidades futuras","premium_btn":"🚀 Subscrever — 1,99 € / mês","premium_later":"Talvez depois","premium_code_placeholder":"Código promo","premium_code_invalid":"❌ Código inválido.","premium_unlocked":"✅ Premium desbloqueado!"}}, "nl": {"name": "Nederlands", "flag": "🇳🇱", "dir": "ltr", "translations": {"my_routines": "Mijn routines", "create": "Routine maken", "new_routine": "Nieuwe routine", "edit_routine": "Routine bewerken", "routine_name": "Naam", "routine_emoji": "Routine-emoji", "tasks": "Taken", "add_task": "＋ Taak toevoegen", "cancel": "Annuleren", "save": "Opslaan", "task_title": "Taaknaam", "task_desc": "Omschrijving", "task_emoji": "Emoji", "task_color": "Achtergrondkleur", "task_font": "Lettertype", "task_italic": "Cursief", "task_timer": "Timer", "task_timer_on": "Timer inschakelen", "task_minutes": "minuten", "done": "✓ Klaar!", "skip": "Overslaan", "congrats": "Geweldig!", "tasks_done": "taak/taken voltooid!", "back": "Terug", "empty": "Geen routines.\nMaak er een!", "delete_confirm": "Verwijderen", "n_tasks": "taak", "n_tasks_pl": "taken", "launch": "▶ Starten", "search_emoji": "🔍 Zoeken…", "chrono": "timer", "no_routines": "Geen routines.", "create_one": "Maak er een!","alarm_on": "Alarm inschakelen voor deze routine", "alarm_time":"Tijd","alarm_days_label":"Dagen","days":["Ma","Di","Wo","Do","Vr","Za","Zo"],"alarm_before":"Aftelling","premium_title":"Ga Premium","alarm_label":"⏰ Alarm","premium_unlock":"Ontgrendel onbeperkte routines en taken.","premium_msg_routines":"Gratis versie is beperkt tot 2 routines.","premium_msg_tasks":"Gratis versie is beperkt tot 5 taken per routine.","premium_includes":"Premium omvat:","premium_feat1":"Onbeperkte routines","premium_feat2":"Onbeperkte taken","premium_feat3":"Prioriteitsondersteuning","premium_feat4":"Alle toekomstige functies","premium_btn":"🚀 Abonneren — € 1,99 / maand","premium_later":"Misschien later","premium_code_placeholder":"Promotiecode","premium_code_invalid":"❌ Ongeldige code.","premium_unlocked":"✅ Premium ontgrendeld!"}}, "zh": {"name": "中文", "flag": "🇨🇳", "dir": "ltr", "translations": {"my_routines": "我的日程", "create": "创建日程", "new_routine": "新建日程", "edit_routine": "编辑日程", "routine_name": "名称", "routine_emoji": "日程表情", "tasks": "任务", "add_task": "＋ 添加任务", "cancel": "取消", "save": "保存", "task_title": "任务标题", "task_desc": "说明", "task_emoji": "表情", "task_color": "背景颜色", "task_font": "字体", "task_italic": "斜体", "task_timer": "计时器", "task_timer_on": "启用计时器", "task_minutes": "分钟", "done": "✓ 完成！", "skip": "跳过", "congrats": "太棒了！", "tasks_done": "任务已完成！", "back": "返回", "empty": "暂无日程\n创建一个吧！", "delete_confirm": "删除", "n_tasks": "任务", "n_tasks_pl": "任务", "launch": "▶ 开始", "search_emoji": "🔍 搜索…", "chrono": "计时", "no_routines": "暂无日程", "create_one": "创建一个吧！","alarm_on": "为此日程启用闹钟", "alarm_time":"时间","alarm_days_label":"天","days":["一","二","三","四","五","六","日"],"alarm_before":"倒计时","premium_title":"升级到高级版","alarm_label":"⏰ 闹钟","premium_unlock":"解锁无限日程和任务。","premium_msg_routines":"免费版最多2个日程。","premium_msg_tasks":"免费版每个日程最多5个任务。","premium_includes":"高级版包含：","premium_feat1":"无限日程","premium_feat2":"每个日程无限任务","premium_feat3":"优先支持","premium_feat4":"所有未来功能","premium_btn":"🚀 订阅 — 1.99€ / 月","premium_later":"也许以后","premium_code_placeholder":"优惠码","premium_code_invalid":"❌ 无效码。","premium_unlocked":"✅ 高级版已解锁！"}}, "ko": {"name": "한국어", "flag": "🇰🇷", "dir": "ltr", "translations": {"my_routines": "내 루틴", "create": "루틴 만들기", "new_routine": "새 루틴", "edit_routine": "루틴 수정", "routine_name": "이름", "routine_emoji": "루틴 이모지", "tasks": "할 일", "add_task": "＋ 할 일 추가", "cancel": "취소", "save": "저장", "task_title": "할 일 제목", "task_desc": "설명", "task_emoji": "이모지", "task_color": "배경 색상", "task_font": "폰트", "task_italic": "기울임", "task_timer": "타이머", "task_timer_on": "타이머 활성화", "task_minutes": "분", "done": "✓ 완료!", "skip": "건너뛰기", "congrats": "잘했어요!", "tasks_done": "할 일 완료!", "back": "루틴으로 돌아가기", "empty": "루틴이 없습니다\n만들어보세요!", "delete_confirm": "삭제", "n_tasks": "개", "n_tasks_pl": "개", "launch": "▶ 시작", "search_emoji": "🔍 검색…", "chrono": "타이머", "no_routines": "루틴이 없습니다", "create_one": "만들어보세요!","alarm_on": "이 루틴에 알람 활성화", "alarm_time":"시간","alarm_days_label":"요일","days":["월","화","수","목","금","토","일"],"alarm_before":"카운트다운","premium_title":"프리미엄 가입","alarm_label":"⏰ 알람","premium_unlock":"무제한 루틴과 할 일을 잠금 해제하세요.","premium_msg_routines":"무료 버전은 2개 루틴으로 제한됩니다.","premium_msg_tasks":"무료 버전은 루틴당 5개 할 일로 제한됩니다.","premium_includes":"프리미엄 포함:","premium_feat1":"무제한 루틴","premium_feat2":"무제한 할 일","premium_feat3":"우선 지원","premium_feat4":"모든 미래 기능","premium_btn":"🚀 구독 — €1.99 / 월","premium_later":"나중에","premium_code_placeholder":"프로모 코드","premium_code_invalid":"❌ 잘못된 코드.","premium_unlocked":"✅ 프리미엄 잠금 해제!"}}, "th": {"name": "ไทย", "flag": "🇹🇭", "dir": "ltr", "translations": {"my_routines": "กิจวัตรของฉัน", "create": "สร้างกิจวัตร", "new_routine": "กิจวัตรใหม่", "edit_routine": "แก้ไขกิจวัตร", "routine_name": "ชื่อ", "routine_emoji": "อีโมจิ", "tasks": "งาน", "add_task": "＋ เพิ่มงาน", "cancel": "ยกเลิก", "save": "บันทึก", "task_title": "ชื่องาน", "task_desc": "คำอธิบาย", "task_emoji": "อีโมจิ", "task_color": "สีพื้นหลัง", "task_font": "แบบอักษร", "task_italic": "ตัวเอียง", "task_timer": "ตัวจับเวลา", "task_timer_on": "เปิดใช้ตัวจับเวลา", "task_minutes": "นาที", "done": "✓ เสร็จแล้ว!", "skip": "ข้าม", "congrats": "เยี่ยมมาก!", "tasks_done": "งานเสร็จแล้ว!", "back": "กลับ", "empty": "ยังไม่มีกิจวัตร\nสร้างเลย!", "delete_confirm": "ลบ", "n_tasks": "งาน", "n_tasks_pl": "งาน", "launch": "▶ เริ่ม", "search_emoji": "🔍 ค้นหา…", "chrono": "จับเวลา", "no_routines": "ยังไม่มีกิจวัตร", "create_one": "สร้างเลย!","alarm_on": "เปิดใช้การแจ้งเตือนสำหรับกิจวัตรนี้", "alarm_time":"เวลา","alarm_days_label":"วัน","days":["จ","อ","พ","พฤ","ศ","ส","อา"],"alarm_before":"นับถอยหลัง","premium_title":"อัพเกรดเป็น Premium","alarm_label":"⏰ การแจ้งเตือน","premium_unlock":"ปลดล็อคกิจวัตรและงานไม่จำกัด","premium_msg_routines":"เวอร์ชันฟรีจำกัด 2 กิจวัตร","premium_msg_tasks":"เวอร์ชันฟรีจำกัด 5 งานต่อกิจวัตร","premium_includes":"Premium รวมถึง:","premium_feat1":"กิจวัตรไม่จำกัด","premium_feat2":"งานไม่จำกัด","premium_feat3":"การสนับสนุนพิเศษ","premium_feat4":"ฟีเจอร์ในอนาคตทั้งหมด","premium_btn":"🚀 สมัครสมาชิก — 1.99€ / เดือน","premium_later":"บางทีทีหลัง","premium_code_placeholder":"รหัสโปรโม","premium_code_invalid":"❌ รหัสไม่ถูกต้อง","premium_unlocked":"✅ ปลดล็อค Premium แล้ว!"}}, "hi": {"name": "हिन्दी", "flag": "🇮🇳", "dir": "ltr", "translations": {"my_routines": "मेरी दिनचर्या", "create": "दिनचर्या बनाएं", "new_routine": "नई दिनचर्या", "edit_routine": "दिनचर्या संपादित करें", "routine_name": "नाम", "routine_emoji": "इमोजी", "tasks": "कार्य", "add_task": "＋ कार्य जोड़ें", "cancel": "रद्द करें", "save": "सहेजें", "task_title": "कार्य शीर्षक", "task_desc": "विवरण", "task_emoji": "इमोजी", "task_color": "पृष्ठभूमि रंग", "task_font": "फ़ॉन्ट", "task_italic": "तिरछा", "task_timer": "टाइमर", "task_timer_on": "टाइमर सक्रिय करें", "task_minutes": "मिनट", "done": "✓ हो गया!", "skip": "छोड़ें", "congrats": "शाबाश!", "tasks_done": "कार्य पूर्ण!", "back": "वापस जाएं", "empty": "कोई दिनचर्या नहीं\nबनाएं!", "delete_confirm": "हटाएं", "n_tasks": "कार्य", "n_tasks_pl": "कार्य", "launch": "▶ शुरू", "search_emoji": "🔍 खोजें…", "chrono": "टाइमर", "no_routines": "कोई दिनचर्या नहीं", "create_one": "बनाएं!","alarm_on": "इस दिनचर्या के लिए अलार्म सक्रिय करें", "alarm_time":"समय","alarm_days_label":"दिन","days":["सो","मं","बु","गु","शु","श","र"],"alarm_before":"काउंटडाउन","premium_title":"प्रीमियम लें","alarm_label":"⏰ अलार्म","premium_unlock":"असीमित दिनचर्या और कार्य अनलॉक करें।","premium_msg_routines":"मुफ्त संस्करण 2 दिनचर्या तक सीमित है।","premium_msg_tasks":"मुफ्त संस्करण प्रति दिनचर्या 5 कार्यों तक सीमित है।","premium_includes":"प्रीमियम में शामिल:","premium_feat1":"असीमित दिनचर्या","premium_feat2":"असीमित कार्य","premium_feat3":"प्राथमिकता सहायता","premium_feat4":"सभी भविष्य की सुविधाएं","premium_btn":"🚀 सदस्यता — 1.99€ / माह","premium_later":"शायद बाद में","premium_code_placeholder":"प्रोमो कोड","premium_code_invalid":"❌ अमान्य कोड।","premium_unlocked":"✅ प्रीमियम अनलॉक!"}}, "ar": {"name": "العربية", "flag": "🇸🇦", "dir": "rtl", "translations": {"my_routines": "روتيناتي", "create": "إنشاء روتين", "new_routine": "روتين جديد", "edit_routine": "تعديل الروتين", "routine_name": "الاسم", "routine_emoji": "إيموجي الروتين", "tasks": "المهام", "add_task": "＋ إضافة مهمة", "cancel": "إلغاء", "save": "حفظ", "task_title": "عنوان المهمة", "task_desc": "الوصف", "task_emoji": "إيموجي", "task_color": "لون الخلفية", "task_font": "الخط", "task_italic": "مائل", "task_timer": "مؤقت", "task_timer_on": "تفعيل المؤقت", "task_minutes": "دقائق", "done": "✓ تم!", "skip": "تخطي", "congrats": "أحسنت!", "tasks_done": "مهمة مكتملة!", "back": "رجوع", "empty": "لا يوجد روتين\nأنشئ واحداً!", "delete_confirm": "حذف", "n_tasks": "مهمة", "n_tasks_pl": "مهام", "launch": "▶ ابدأ", "search_emoji": "🔍 بحث…", "chrono": "مؤقت", "no_routines": "لا يوجد روتين", "create_one": "أنشئ واحداً!","alarm_on": "تفعيل منبّه لهذا الروتين", "alarm_time":"الوقت","alarm_days_label":"الأيام","days":["إث","ثل","أر","خم","جم","سب","أح"],"alarm_before":"العد التنازلي","premium_title":"احصل على Premium","alarm_label":"⏰ منبّه","premium_unlock":"افتح روتينات ومهام غير محدودة.","premium_msg_routines":"النسخة المجانية محدودة بروتينين.","premium_msg_tasks":"النسخة المجانية محدودة بـ5 مهام لكل روتين.","premium_includes":"يشمل Premium:","premium_feat1":"روتينات غير محدودة","premium_feat2":"مهام غير محدودة","premium_feat3":"دعم ذو أولوية","premium_feat4":"جميع الميزات المستقبلية","premium_btn":"🚀 اشترك — 1.99€ / شهر","premium_later":"ربما لاحقاً","premium_code_placeholder":"رمز ترويجي","premium_code_invalid":"❌ رمز غير صالح.","premium_unlocked":"✅ تم فتح Premium!"}}};
 
 let T = {}; // current translations — starts empty, filled by setLang()
 
@@ -965,8 +1034,33 @@ function setLang(code) {
   const lblTasks = document.getElementById('lbl-tasks');
   if(lblTasks) lblTasks.textContent = T.tasks || 'Tasks';
   // Alarm label
+  const alarmSectionLabel=document.getElementById('alarm-section-label');
+  if(alarmSectionLabel) alarmSectionLabel.textContent=T.alarm_label||'⏰ Alarm';
   const alarmOnLabel = document.getElementById('alarm-on-label');
   if(alarmOnLabel) alarmOnLabel.textContent = T.alarm_on || 'Enable an alarm for this routine';
+  // Alarm time label
+  document.querySelectorAll('.alarm-time-label').forEach(e=>e.textContent=T.alarm_time||'Time');
+  document.querySelectorAll('.alarm-before-label').forEach(e=>e.textContent=T.alarm_before||'h before countdown');
+  // Paywall
+  const pwTitle=document.getElementById('pw-title'); if(pwTitle) pwTitle.textContent=T.premium_title||'Go Premium';
+  const pwUnlock=document.getElementById('pw-unlock'); if(pwUnlock) pwUnlock.textContent=T.premium_unlock||'Unlock unlimited routines and tasks.';
+  const pwIncludes=document.getElementById('pw-includes'); if(pwIncludes) pwIncludes.textContent=T.premium_includes||'Premium includes:';
+  const pwF1=document.getElementById('pw-f1'); if(pwF1) pwF1.textContent=T.premium_feat1||'Unlimited routines';
+  const pwF2=document.getElementById('pw-f2'); if(pwF2) pwF2.textContent=T.premium_feat2||'Unlimited tasks per routine';
+  const pwF3=document.getElementById('pw-f3'); if(pwF3) pwF3.textContent=T.premium_feat3||'Priority support';
+  const pwF4=document.getElementById('pw-f4'); if(pwF4) pwF4.textContent=T.premium_feat4||'All future features';
+  const pwBtn=document.getElementById('pw-btn'); if(pwBtn) pwBtn.textContent=T.premium_btn||'🚀 Upgrade — €1.99 / month';
+  const pwLater=document.getElementById('pw-later'); if(pwLater) pwLater.textContent=T.premium_later||'Maybe later';
+  const promoInp=document.getElementById('promo-input'); if(promoInp) promoInp.placeholder=T.premium_code_placeholder||'Promo code';
+  // Days label and day buttons
+  const daysLabel=document.getElementById('alarm-days-label'); if(daysLabel) daysLabel.textContent=T.alarm_days_label||'Days';
+  if(T.days && T.days.length===7){
+    const dayOrder=[1,2,3,4,5,6,0];
+    dayOrder.forEach((d,i)=>{
+      const btn=document.getElementById('day-'+d);
+      if(btn) btn.textContent=T.days[i];
+    });
+  }
   render();
 }
 
