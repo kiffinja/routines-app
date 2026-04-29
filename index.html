@@ -808,8 +808,7 @@ function demo(){
     alarm:{on:false}
   }];
   save();
-  // Show onboarding after a short delay
-  setTimeout(showOnboarding, 800);
+  // Onboarding triggered after render via initLang
 }
 
 // ── ONBOARDING ────────────────────────────────────────
@@ -1121,15 +1120,12 @@ document.getElementById('re').addEventListener('input', function(){
   if(saved && LANGS[saved]) {
     setLang(saved);
   } else {
+    // Auto-detect browser language, fallback to English
     const browser = (navigator.language || 'en').substring(0,2);
-    if(LANGS[browser]) {
-      setLang(browser);
-    } else {
-      // Show picker — but first init T to English so render() doesn't crash
-      T = LANGS['en'].translations;
-      showLangScreen();
-      render(); // render with English while user picks
-    }
+    const code = LANGS[browser] ? browser : 'en';
+    setLang(code);
+    // Show onboarding on first launch
+    setTimeout(showOnboarding, 600);
   }
 })();
 
