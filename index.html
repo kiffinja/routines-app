@@ -13,7 +13,7 @@
 <title>Routines</title>
 <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Boogaloo&family=Fredoka+One&family=Syne:wght@800&family=Space+Grotesk:wght@700&family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,700;1,700&family=Bangers&family=Pacifico&family=Titan+One&family=Abril+Fatface&family=Lobster&family=Chewy&family=Press+Start+2P&family=Lilita+One&family=Permanent+Marker&family=Russo+One&family=Playfair+Display:wght@700&family=Josefin+Sans:wght@700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F3EEFF;--card:#fff;--ink:#1A1025;--ink-l:#7060A0;--border:#DDD4F5;--acc:#7C3AFF;--acc-l:#EDE5FF}
+:root{--bg:#F3EEFF;--card:#fff;--ink:#1A1025;--ink-l:#7060A0;--border:#DDD4F5;--acc:#7C3AFF;--acc-l:#EDE5FF;--body:#fff;--ban:#DDD4F5}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
 header{background:var(--ink);padding:1rem 2rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 18px rgba(0,0,0,.22)}
@@ -23,16 +23,16 @@ header{background:var(--ink);padding:1rem 2rem;position:sticky;top:0;z-index:100
 .ph{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:1.8rem}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.2rem}
 /* CARD */
-.rc{background:var(--card);border-radius:20px;overflow:hidden;box-shadow:0 2px 16px rgba(80,0,200,.08);transition:transform .2s,box-shadow .2s;position:relative}
+.rc{background:var(--card);border-radius:20px;overflow:hidden;box-shadow:0 2px 16px rgba(80,0,200,.08);transition:transform .2s,box-shadow .2s;position:relative;display:flex;flex-direction:column}
 .rc:hover{transform:translateY(-5px);box-shadow:0 12px 32px rgba(80,0,200,.16)}
-.rc-ban{height:120px;display:flex;align-items:center;justify-content:center;font-size:3.6rem;position:relative;overflow:hidden;background:#fff}
+.rc-ban{height:120px;display:flex;align-items:center;justify-content:center;font-size:3.6rem;position:relative;overflow:hidden;background:var(--ban)}
 .rc-ban-e{position:relative;z-index:1}
 .rc-acts{position:absolute;top:.6rem;right:.6rem;display:flex;gap:.3rem;opacity:0;transition:opacity .2s}
 .rc:hover .rc-acts{opacity:1}
 .ib{width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:transform .15s}
 .ib:hover{transform:scale(1.15)}
 .ib-e{background:rgba(240,240,240,.95)} .ib-d{background:rgba(255,200,200,.95);color:#a00}
-.rc-body{padding:.9rem 1.1rem 1.1rem}
+.rc-body{padding:.9rem 1.1rem .9rem;background:var(--body);flex:1}
 .rc-name{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:.25rem}
 .rc-meta{font-size:.75rem;color:var(--ink-l);margin-bottom:.75rem}
 .play{width:100%;padding:.55rem;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .18s;background:var(--ink);color:#fff}
@@ -129,12 +129,27 @@ textarea.finp{resize:vertical;min-height:68px}
 @keyframes up{0%{transform:translateY(18px);opacity:0}100%{transform:translateY(0);opacity:1}}
 .day-btn{padding:.35rem .55rem;border-radius:8px;border:2px solid var(--border);background:#fff;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--ink-l);transition:all .15s}
 .day-btn.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.rc-alarm{margin-top:.4rem;display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--ink-l)}
+.rc-alarm{margin-top:.4rem;padding-bottom:.6rem;display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--ink-l)}
 .rc-alarm-badge{background:var(--ink);color:#fff;border-radius:8px;padding:.2rem .5rem;font-size:.72rem;font-weight:600;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:.3rem}
 .rc-alarm-badge.soon{background:#FF3CAC;animation:pulse 1.5s infinite}
 .rc-alarm-badge.now{background:#FF1744;animation:pulse .7s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.65}}
-::-webkit-scrollbar{width:5px}[dir=rtl] .th{flex-direction:row-reverse}[dir=rtl] .rc-acts{left:.6rem;right:auto} ::-webkit-scrollbar-thumb{background:#c0b0e8;border-radius:3px}
+::-webkit-scrollbar{width:5px}
+
+/* THEMES */
+body[data-theme="vivid"] { --hue-start:0; --hue-end:359; }
+body[data-theme="elegant"] { --hue-start:0; --hue-end:359; }
+body[data-theme="luxe"] { --hue-start:0; --hue-end:359; }
+
+/* Vivid hue slider gradient */
+body[data-theme="vivid"] .hue-slider { background: linear-gradient(to right,hsl(0,80%,55%),hsl(40,80%,55%),hsl(80,80%,55%),hsl(120,80%,55%),hsl(160,80%,55%),hsl(200,80%,55%),hsl(240,80%,55%),hsl(280,80%,55%),hsl(320,80%,55%),hsl(359,80%,55%)) !important; }
+
+/* Elegant palette */
+body[data-theme="elegant"] .hue-slider { background: linear-gradient(to right,#B5451B,#C4884A,#1B3A6B,#5C7A5C,#8B4A6B,#6B4A8B,#2E6B6B,#B5451B) !important; }
+
+/* Luxe palette */  
+body[data-theme="luxe"] .hue-slider { background: linear-gradient(to right,#1A1A1A,#C9A84C,#F5F5DC,#3D2B1F,#E8E0D0,#8B7355,#C9A84C,#1A1A1A) !important; }
+[dir=rtl] .th{flex-direction:row-reverse}[dir=rtl] .rc-acts{left:.6rem;right:auto} ::-webkit-scrollbar-thumb{background:#c0b0e8;border-radius:3px}
 </style>
 </head>
 <body>
@@ -143,10 +158,54 @@ textarea.finp{resize:vertical;min-height:68px}
   <div style="color:rgba(255,255,255,.5);font-size:.9rem;margin-bottom:2.5rem;text-align:center">Choose your language · Choisissez votre langue</div>
   <div id="lang-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;width:100%;max-width:400px"></div>
 </div>
-<header><div class="logo">Routine<b>.</b></div><button id="lang-btn" onclick="showLangScreen()" style="background:rgba(255,255,255,.12);border:none;color:#fff;padding:.35rem .7rem;border-radius:8px;cursor:pointer;font-size:.85rem;margin-left:auto">🌐</button></header>
+<header><div class="logo">Routine<b>.</b></div><div style="display:flex;gap:.5rem;margin-left:auto"><button id="theme-btn" onclick="showThemePicker()" style="background:rgba(255,255,255,.12);border:none;color:#fff;padding:.35rem .7rem;border-radius:8px;cursor:pointer;font-size:.85rem">🎨</button><button id="lang-btn" onclick="showLangScreen()" style="background:rgba(255,255,255,.12);border:none;color:#fff;padding:.35rem .7rem;border-radius:8px;cursor:pointer;font-size:.85rem">🌐</button></div></header>
 <div class="main">
   <div class="ph">Mes routines</div>
   <div class="grid" id="grid"></div>
+</div>
+
+
+<!-- THEME PICKER -->
+<div id="theme-screen" class="hidden" style="position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:2rem">
+  <div style="background:#fff;border-radius:28px;padding:2rem;max-width:360px;width:100%;box-shadow:0 28px 80px rgba(0,0,0,.3)">
+    <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:1.2rem;color:#1A1025">🎨 Choose a theme</div>
+    <div style="display:flex;flex-direction:column;gap:.8rem">
+      <button class="theme-opt" data-theme="vivid" style="border:2.5px solid transparent;border-radius:16px;padding:1rem;cursor:pointer;text-align:left;background:#F3EEFF;transition:all .2s">
+        <div style="display:flex;gap:.4rem;margin-bottom:.5rem">
+          <div style="width:24px;height:24px;border-radius:50%;background:#FF3CAC"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#7C3AFF"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#00E5FF"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#C8FF3E"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#FF9100"></div>
+        </div>
+        <div style="font-weight:700;font-size:.9rem;color:#1A1025">✨ Vivid</div>
+        <div style="font-size:.75rem;color:#888">Bold & energetic colors</div>
+      </button>
+      <button class="theme-opt" data-theme="elegant" style="border:2.5px solid transparent;border-radius:16px;padding:1rem;cursor:pointer;text-align:left;background:#F5F0EB;transition:all .2s">
+        <div style="display:flex;gap:.4rem;margin-bottom:.5rem">
+          <div style="width:24px;height:24px;border-radius:50%;background:#B5451B"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#1B3A6B"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#5C7A5C"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#8B4A6B"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#C4884A"></div>
+        </div>
+        <div style="font-weight:700;font-size:.9rem;color:#1A1025">🏛 Elegant</div>
+        <div style="font-size:.75rem;color:#888">Terracotta, navy & sage</div>
+      </button>
+      <button class="theme-opt" data-theme="luxe" style="border:2.5px solid transparent;border-radius:16px;padding:1rem;cursor:pointer;text-align:left;background:#1A1A1A;transition:all .2s">
+        <div style="display:flex;gap:.4rem;margin-bottom:.5rem">
+          <div style="width:24px;height:24px;border-radius:50%;background:#C9A84C"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#F5F5DC"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#3D2B1F"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#E8E0D0"></div>
+          <div style="width:24px;height:24px;border-radius:50%;background:#1A1A1A"></div>
+        </div>
+        <div style="font-weight:700;font-size:.9rem;color:#fff">✨ Luxe</div>
+        <div style="font-size:.75rem;color:#aaa">Black, gold & ivory</div>
+      </button>
+    </div>
+    <button onclick="hideThemePicker()" style="width:100%;margin-top:1rem;padding:.7rem;background:none;border:none;color:#888;font-family:'DM Sans',sans-serif;cursor:pointer;font-size:.88rem">Cancel</button>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -343,21 +402,15 @@ function render(){
     routines.forEach((r,i)=>{
       const card=document.createElement('div');
       card.className='rc';
+      card.style.boxShadow='0 0 0 1.3px '+THEMES[currentTheme].btnBg+', inset 0 0 0 1.3px '+THEMES[currentTheme].btnBg+', 0 2px 16px rgba(80,0,200,.08)';
 
       // Banner
       const ban=document.createElement('div');
       ban.className='rc-ban';
       const emoji=document.createElement('span');
       emoji.className='rc-ban-e'; emoji.textContent=r.emoji||'📋';
-      // Color strip
-      const strip=document.createElement('div');
-      strip.style.cssText='position:absolute;bottom:0;left:0;right:0;height:4px;display:flex';
-      r.tasks.slice(0,8).forEach(t=>{
-        const s=document.createElement('div');
-        s.style.cssText='flex:1;background:'+(t.color||'#ccc');
-        strip.appendChild(s);
-      });
-      // Action buttons
+      // Color strip — only if tasks exist
+      const thPalette = THEMES[currentTheme].taskColors;
       const acts=document.createElement('div');
       acts.className='rc-acts';
       const editBtn=document.createElement('button');
@@ -367,7 +420,19 @@ function render(){
       delBtn.className='ib ib-d'; delBtn.textContent='🗑';
       delBtn.addEventListener('click',ev=>{ev.stopPropagation();delRoutine(i);});
       acts.append(editBtn,delBtn);
-      ban.append(emoji,strip,acts);
+      ban.append(emoji,acts);
+      if(r.tasks && r.tasks.length > 0){
+        const strip=document.createElement('div');
+        strip.style.cssText='position:absolute;bottom:0;left:0;right:0;height:8px;display:flex';
+        r.tasks.slice(0,8).forEach((t,ti)=>{
+          const s=document.createElement('div');
+          s.style.cssText='flex:1;background:'+(thPalette[ti%thPalette.length]||t.color||'#ccc');
+          s.title=t.title||'';
+          strip.appendChild(s);
+        });
+        ban.appendChild(strip);
+      }
+
 
       // Body
       const body=document.createElement('div');
@@ -527,9 +592,9 @@ function addTask(t){
   const initHue = d.color ? hslFromHex(d.color) : 300;
   const hueSlider=document.createElement('input');
   hueSlider.type='range'; hueSlider.min=0; hueSlider.max=359; hueSlider.value=initHue;
-  hueSlider.style.cssText='width:100%;height:28px;border-radius:12px;cursor:pointer;outline:none;border:none;appearance:none;-webkit-appearance:none;background:linear-gradient(to right,hsl(0,80%,55%),hsl(40,80%,55%),hsl(80,80%,55%),hsl(120,80%,55%),hsl(160,80%,55%),hsl(200,80%,55%),hsl(240,80%,55%),hsl(280,80%,55%),hsl(320,80%,55%),hsl(359,80%,55%))';
+  hueSlider.className='hue-slider'; hueSlider.style.cssText='width:100%;height:28px;border-radius:12px;cursor:pointer;outline:none;border:none;appearance:none;-webkit-appearance:none;background:'+THEMES[currentTheme].sliderGrad;
   function updateColor(hue){
-    const col=`hsl(${hue},80%,55%)`;
+    const col=THEMES[currentTheme].getColor(hue);
     num.style.background=col;
     fprev.style.background=col+'40'; fprev.style.color=col;
   }
@@ -601,6 +666,103 @@ function enableDrag(item){
   });
 }
 
+
+// ── THEME SYSTEM ─────────────────────────────────────
+const THEMES = {
+  vivid: {
+    bg:'#F3EEFF', card:'#fff', ink:'#1A1025', inkL:'#7060A0',
+    border:'#DDD4F5', acc:'#7C3AFF', accL:'#EDE5FF', header:'#1A1025', ban:'#DDD4F5', body:'#fff',
+    btnBg:'#1A1025', btnColor:'#fff',
+    finpBg:'#fff', tiColor:'#fff',
+    getColor: (hue) => `hsl(${hue},80%,55%)`,
+    sliderGrad: 'linear-gradient(to right,hsl(0,80%,55%),hsl(40,80%,55%),hsl(80,80%,55%),hsl(120,80%,55%),hsl(160,80%,55%),hsl(200,80%,55%),hsl(240,80%,55%),hsl(280,80%,55%),hsl(320,80%,55%),hsl(359,80%,55%))',
+    taskColors:['hsl(0,80%,55%)','hsl(30,80%,55%)','hsl(60,80%,55%)','hsl(120,80%,55%)','hsl(180,80%,55%)','hsl(220,80%,55%)','hsl(270,80%,55%)','hsl(300,80%,55%)','hsl(330,80%,55%)'],
+  },
+  elegant: {
+    bg:'#EDE4D8', card:'#F7F0E6', ink:'#2C1A0E', inkL:'#7A5A42',
+    border:'#D5C4B0', acc:'#8B3A1B', accL:'#F0DDD0', header:'#2C1A0E', ban:'#D5C4B0', body:'#F7F0E6',
+    btnBg:'#2C1A0E', btnColor:'#F7F0E6',
+    finpBg:'#F7F0E6', tiColor:'#F7F0E6',
+    getColor: (hue) => {
+      const cols=['#B5451B','#1B3A6B','#5C7A5C','#8B4A6B','#C4884A','#4A6B8B','#2E6B6B','#7A5C1B'];
+      return cols[Math.floor(hue/45)%cols.length];
+    },
+    sliderGrad: 'linear-gradient(to right,#B5451B,#C4884A,#1B3A6B,#5C7A5C,#8B4A6B,#4A6B8B,#2E6B6B,#7A5C1B)',
+    taskColors:['#B5451B','#1B3A6B','#5C7A5C','#8B4A6B','#C4884A','#4A6B8B','#2E6B6B','#7A5C1B'],
+  },
+  luxe: {
+    bg:'#0D0D0D', card:'#1A1A1A', ink:'#E8D9B5', inkL:'#C9A84C',
+    border:'#2A2A2A', acc:'#C9A84C', accL:'#1F1A0A', header:'#050505', ban:'#8B8178', body:'#333333',
+    btnBg:'#C9A84C', btnColor:'#0D0D0D',
+    finpBg:'#111', tiColor:'#1A1A1A',
+    getColor: (hue) => {
+      const cols=['#C9A84C','#E8D9B5','#8B7355','#3D2B1F','#D4C5A0','#6B5A3A','#C9A84C','#F0E8D0'];
+      return cols[Math.floor(hue/45)%cols.length];
+    },
+    sliderGrad: 'linear-gradient(to right,#C9A84C,#E8D9B5,#8B7355,#3D2B1F,#D4C5A0,#6B5A3A,#C9A84C,#F0E8D0)',
+    taskColors:['#C9A84C','#E8D9B5','#8B7355','#3D2B1F','#D4C5A0','#6B5A3A','#F0E8D0','#1A1A1A'],
+  }
+};
+
+let currentTheme = localStorage.getItem('habits_theme') || 'vivid';
+
+function applyTheme(name){
+  currentTheme = name;
+  localStorage.setItem('habits_theme', name);
+  const t = THEMES[name];
+  const r = document.documentElement.style;
+  r.setProperty('--bg', t.bg);
+  r.setProperty('--card', t.card);
+  r.setProperty('--ink', t.ink);
+  r.setProperty('--ink-l', t.inkL);
+  r.setProperty('--border', t.border);
+  r.setProperty('--acc', t.acc);
+  r.setProperty('--acc-l', t.accL);
+  r.setProperty('--ban', t.ban);
+  r.setProperty('--body', t.body);
+  const hdr = document.querySelector('header');
+  if(hdr) hdr.style.background = t.header;
+  document.body.dataset.theme = name;
+  document.body.style.background = t.bg;
+  // Update hue sliders
+  document.querySelectorAll('.hue-slider').forEach(s => s.style.background = t.sliderGrad);
+  // Update launch buttons
+  document.querySelectorAll('.play').forEach(b => { b.style.background=t.btnBg; b.style.color=t.btnColor; });
+  // Update card borders
+  document.querySelectorAll('.rc').forEach(c => { c.style.boxShadow='0 0 0 1.3px '+t.btnBg+', inset 0 0 0 1.3px '+t.btnBg+', 0 2px 16px rgba(80,0,200,.08)'; });
+  // Update inputs
+  document.querySelectorAll('.finp').forEach(i => i.style.background=t.finpBg);
+  // Update task items
+  document.querySelectorAll('.ti').forEach(i => i.style.background=t.tiColor);
+  // Update modal
+  document.querySelectorAll('.modal').forEach(m => m.style.background=t.card);
+  // Update theme picker border
+  document.querySelectorAll('.theme-opt').forEach(b => {
+    b.style.borderColor = b.dataset.theme === name ? t.acc : 'transparent';
+  });
+  // Re-render only if T is already initialized
+  if(typeof render === 'function' && T && Object.keys(T).length > 0) render();
+}
+
+function showThemePicker(){
+  const screen = document.getElementById('theme-screen');
+  screen.classList.remove('hidden');
+  screen.style.display = 'flex';
+  // Mark current theme
+  document.querySelectorAll('.theme-opt').forEach(b => {
+    const t = THEMES[currentTheme];
+    b.style.borderColor = b.dataset.theme === currentTheme ? t.acc : 'transparent';
+  });
+}
+
+function hideThemePicker(){
+  const screen = document.getElementById('theme-screen');
+  screen.classList.add('hidden');
+  screen.style.display = 'none';
+}
+
+// Theme applied after T is initialized — see initLang()
+
 // ── FREEMIUM ─────────────────────────────────────────
 const FREE_ROUTINES = 2;
 const FREE_TASKS    = 5;
@@ -657,7 +819,7 @@ function saveRoutine(){
     const emojiVal=it.querySelector('.emoji-inp')?.value||'✨';
     const hueSliderEl=it.querySelector('input[type=range]');
     const hue=hueSliderEl?+hueSliderEl.value:300;
-    const color=`hsl(${hue},80%,55%)`;
+    const color=THEMES[currentTheme].getColor(hue);
     const font='ff3'; const fontFam="'Fredoka One',cursive";
     const cbs=it.querySelectorAll('input[type=checkbox]');
     const italic=cbs[0]?.checked||false;
@@ -891,23 +1053,40 @@ function updateAlarmBadge(r,i){
   const ms=getNextAlarm(r.alarm);
   if(ms===null) return;
   const beforeMs=(r.alarm.before||2)*3600*1000;
+  const t=THEMES[currentTheme];
+
   if(ms>beforeMs) {
-    // Show scheduled time only
+    // Show scheduled time only — use theme ink-l color
     const [h,m]=r.alarm.time.split(':');
     const days=T.days||['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const dayLabels=r.alarm.days.map(d=>days[d===0?6:d-1]).join(', ');
-    el.innerHTML='<span style="font-size:.75rem;color:var(--ink-l)">⏰ '+r.alarm.time+' · '+dayLabels+'</span>';
+    el.innerHTML='<span style="font-size:.75rem;color:'+t.inkL+'">⏰ '+r.alarm.time+' · '+dayLabels+'</span>';
     return;
   }
-  // Within countdown window — show countdown badge
-  const pct = ms / beforeMs; // 1.0 = just started, 0.0 = now
+
+  // Within countdown window — theme-aware colors
+  const pct = ms / beforeMs;
   let badgeColor, pulse = false;
-  if(pct > 0.5)       { badgeColor='#00C853'; }       // green — more than half left
-  else if(pct > 0.1)  { badgeColor='#FF9100'; }       // orange — between 10% and 50%
-  else                { badgeColor='#FF1744'; pulse=true; } // red + pulse — last 10%
+  if(currentTheme === 'luxe'){
+    // Luxe palette: gold → warm brown → dark
+    if(pct > 0.5)      { badgeColor='#C9A84C'; }
+    else if(pct > 0.1) { badgeColor='#8B7355'; }
+    else               { badgeColor='#6B4A2A'; pulse=true; }
+  } else if(currentTheme === 'elegant'){
+    // Elegant palette: sage → terracotta → bordeaux
+    if(pct > 0.5)      { badgeColor='#5C7A5C'; }
+    else if(pct > 0.1) { badgeColor='#C4884A'; }
+    else               { badgeColor='#8B3A1B'; pulse=true; }
+  } else {
+    // Vivid — original green/orange/red
+    if(pct > 0.5)      { badgeColor='#00C853'; }
+    else if(pct > 0.1) { badgeColor='#FF9100'; }
+    else               { badgeColor='#FF1744'; pulse=true; }
+  }
 
   const badge=document.createElement('div');
-  badge.style.cssText=`display:inline-flex;align-items:center;gap:.35rem;background:${badgeColor};color:#fff;border-radius:8px;padding:.2rem .55rem;font-size:.72rem;font-weight:700;font-family:'Space Grotesk',sans-serif;${pulse?'animation:pulse 1s infinite':''}`;
+  const textColor = currentTheme==='luxe' ? '#0D0D0D' : '#fff';
+  badge.style.cssText=`display:inline-flex;align-items:center;gap:.35rem;background:${badgeColor};color:${textColor};border-radius:8px;padding:.2rem .55rem;font-size:.72rem;font-weight:700;font-family:'Space Grotesk',sans-serif;${pulse?'animation:pulse 1s infinite':''}`;
   const totalSec=Math.floor(ms/1000);
   const hh=Math.floor(totalSec/3600);
   const mm=Math.floor((totalSec%3600)/60);
@@ -1049,13 +1228,18 @@ function showLangScreen() {
 const _origRender = render;
 render = function() {
   _origRender();
-  // Update heading and add button text after render
+  // Hide heading
   const ph = document.querySelector('.ph');
-  if(ph) ph.textContent = T.my_routines || 'My routines';
+  if(ph) ph.style.display = 'none';
   const addBtn = document.querySelector('.add-btn');
   if(addBtn) addBtn.innerHTML = '＋ &nbsp;' + (T.create || 'Create a routine');
-  // Update modal labels
-  document.querySelectorAll('.play').forEach(b => b.textContent = T.launch || '▶ Launch');
+  // Update launch buttons with theme colors
+  const t = THEMES[currentTheme];
+  document.querySelectorAll('.play').forEach(b => {
+    b.textContent = T.launch || '▶ Launch';
+    b.style.background = t.btnBg;
+    b.style.color = t.btnColor;
+  });
 };
 
 // ── PATCH showComplete ──
@@ -1074,18 +1258,50 @@ document.getElementById('re').addEventListener('input', function(){
   if(display) display.textContent = this.value || '📋';
 });
 
+// ── THEME OPT CLICKS — wired once ──────────────────
+document.querySelectorAll('.theme-opt').forEach(b => {
+  b.addEventListener('click', () => {
+    applyTheme(b.dataset.theme);
+    // If we're in onboarding flow, close theme screen after pick
+    hideThemePicker();
+  });
+});
+
 // ── INIT LANG ──────────────────────────────────────
 (function initLang() {
-  const saved = localStorage.getItem('habits_lang');
-  if(saved && LANGS[saved]) {
-    setLang(saved);
+  const savedLang  = localStorage.getItem('habits_lang');
+  const savedTheme = localStorage.getItem('habits_theme');
+
+  if(savedLang && LANGS[savedLang]) {
+    // Returning user — just apply lang + theme
+    setLang(savedLang);
+    applyTheme(currentTheme);
   } else {
-    // Auto-detect browser language, fallback to English
+    // First launch — show lang picker, then theme picker
+    // Auto-detect lang as default but still show the screen
     const browser = (navigator.language || 'en').substring(0,2);
     const code = LANGS[browser] ? browser : 'en';
     setLang(code);
-    // Show onboarding on first launch
-    
+    applyTheme(currentTheme);
+
+    // Patch setLang to show theme picker after lang is chosen
+    const _origSetLang = setLang;
+    window._onboardingLangDone = false;
+    const langGrid = document.getElementById('lang-grid');
+    // After lang grid is built, intercept each button to chain theme picker
+    const observer = new MutationObserver(() => {
+      if(langGrid.children.length > 0){
+        observer.disconnect();
+        [...langGrid.children].forEach(btn => {
+          btn.addEventListener('click', () => {
+            // Small delay so lang screen closes first
+            setTimeout(() => showThemePicker(), 200);
+          }, {once: true});
+        });
+      }
+    });
+    observer.observe(langGrid, {childList: true});
+    showLangScreen();
   }
 })();
 
