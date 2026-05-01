@@ -972,50 +972,74 @@ function demo(){
 }
 
 
-// ── ONESIGNAL NOTIFICATIONS & ALARMS ────────────────
+// ── ALARM SCHEDULING via Cloudflare Worker + OneSignal ──
+const WORKER_URL = 'https://routine-alarm-worker.mlegall-art.workers.dev';
 
-// Guard : active timers keyed by "routineName@minuteBucket"
-const _alarmTimers = {};
+// IDs des notifications programmées (pour annulation)
+let _scheduledNotifIds = JSON.parse(localStorage.getItem('os_notif_ids') || '[]');
 
-// Request permission via OneSignal
 function requestNotifPermission(cb){
   if(!window.OneSignalDeferred){ if(cb) cb(false); return; }
   OneSignalDeferred.push(async function(OneSignal){
-    const permission = OneSignal.Notifications.permission;
-    if(permission){ if(cb) cb(true); return; }
+    const granted = OneSignal.Notifications.permission;
+    if(granted){ if(cb) cb(true); return; }
     await OneSignal.Notifications.requestPermission();
     if(cb) cb(OneSignal.Notifications.permission);
   });
 }
 
-// Schedule alarms — each alarm scheduled at most once via key guard
-function scheduleAlarmsInSW(){
+async function cancelPreviousAlarms(){
+  if(!_scheduledNotifIds.length) return;
+  try {
+    await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'cancel', notificationIds: _scheduledNotifIds })
+    });
+  } catch(e){}
+  _scheduledNotifIds = [];
+  localStorage.removeItem('os_notif_ids');
+}
+
+async function scheduleAlarmsInSW(){
   OneSignalDeferred.push(async function(OneSignal){
     if(!OneSignal.Notifications.permission) return;
+
+    // Récupérer le player ID OneSignal
+    const playerId = OneSignal.User.pushSubscription.id;
+    if(!playerId) return;
+
+    // Construire la liste des alarmes
+    const alarms = [];
     routines.forEach(r => {
       if(!r.alarm||!r.alarm.on||!r.alarm.days||!r.alarm.days.length) return;
       const ms = getNextAlarm(r.alarm);
       if(ms === null || ms <= 0 || ms > 48*3600*1000) return;
-      // Key based on routine name + minute bucket — prevents duplicates
-      const key = r.name + '@' + Math.round((Date.now()+ms)/60000);
-      if(_alarmTimers[key]) return; // already scheduled
-      _alarmTimers[key] = setTimeout(() => {
-        delete _alarmTimers[key];
-        if(OneSignal.Notifications.permission){
-          new Notification('⏰ ' + r.name, {
-            body: (typeof T!=='undefined'&&T.alarm_body)||'Your routine is starting! Tap to open.',
-            icon: 'https://kiffinja.github.io/routines-app/icon-192.png',
-            badge: 'https://kiffinja.github.io/routines-app/icon-192.png',
-            tag: 'alarm-' + r.name,
-            vibrate: [300,100,300,100,300],
-          });
-        }
-      }, ms);
+      alarms.push({ name: r.name, fireAt: Date.now() + ms });
     });
+
+    if(!alarms.length) return;
+
+    // Annuler les anciennes notifs
+    await cancelPreviousAlarms();
+
+    // Programmer les nouvelles via le Worker
+    try {
+      const res = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'schedule', playerId, alarms })
+      });
+      const data = await res.json();
+      if(data.results){
+        _scheduledNotifIds = data.results.map(r => r.notificationId).filter(Boolean);
+        localStorage.setItem('os_notif_ids', JSON.stringify(_scheduledNotifIds));
+      }
+    } catch(e){ console.error('Alarm scheduling failed:', e); }
   });
 }
 
-// Request permission on first click, then schedule
+// Demande permission au premier clic puis programme les alarmes
 document.addEventListener('click', function askPerm(){
   requestNotifPermission(ok => { if(ok) scheduleAlarmsInSW(); });
 }, {once: true});
