@@ -7,7 +7,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Routine">
 <link rel="manifest" href="https://kiffinja.github.io/routines-app/manifest.json">
-<script>if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("https://kiffinja.github.io/routines-app/sw.js").catch(()=>{}));</script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "a541dd2f-4a48-4e8e-a451-115aacab6733",
+      serviceWorkerPath: "https://kiffinja.github.io/routines-app/OneSignalSDKWorker.js",
+      notifyButton: { enable: false },
+      welcomeNotification: { disable: true },
+    });
+  });
+</script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Routines</title>
@@ -961,72 +972,53 @@ function demo(){
 }
 
 
-// ── NOTIFICATIONS & SERVICE WORKER ALARM ────────────
+// ── ONESIGNAL NOTIFICATIONS & ALARMS ────────────────
+
+// Guard : active timers keyed by "routineName@minuteBucket"
+const _alarmTimers = {};
+
+// Request permission via OneSignal
 function requestNotifPermission(cb){
-  if(!('Notification' in window)){ if(cb) cb(false); return; }
-  if(Notification.permission === 'granted'){ if(cb) cb(true); return; }
-  Notification.requestPermission().then(p=>{ if(cb) cb(p==='granted'); });
-}
-
-function fireNotification(routineName){
-  const fire = () => {
-    if('serviceWorker' in navigator && navigator.serviceWorker.controller){
-      navigator.serviceWorker.controller.postMessage({
-        type:'SHOW_NOTIFICATION',
-        title:'⏰ ' + routineName,
-        body:'Your routine is starting now! Tap to open.',
-        icon:'https://kiffinja.github.io/routines-app/icon-192.png',
-        badge:'https://kiffinja.github.io/routines-app/icon-192.png',
-        vibrate:[300,100,300,100,300],
-        tag:'habits-alarm-'+Date.now()
-      });
-    } else if('Notification' in window && Notification.permission==='granted'){
-      const n=new Notification('⏰ '+routineName,{
-        body:'Your routine is starting now! Tap to open.',
-        icon:'https://kiffinja.github.io/routines-app/icon-192.png',
-        vibrate:[300,100,300],
-        tag:'habits-alarm'
-      });
-      n.onclick=()=>{ window.focus(); n.close(); };
-    }
-    // Also play sound
-    try{
-      const ctx=new(window.AudioContext||window.webkitAudioContext)();
-      [523,659,784,659,523].forEach((freq,j)=>{
-        const osc=ctx.createOscillator();
-        const gain=ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.frequency.value=freq; osc.type='sine';
-        gain.gain.setValueAtTime(0.4,ctx.currentTime+j*0.2);
-        gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+j*0.2+0.35);
-        osc.start(ctx.currentTime+j*0.2);
-        osc.stop(ctx.currentTime+j*0.2+0.35);
-      });
-    } catch(e){}
-  };
-  if(Notification.permission==='granted'){ fire(); }
-  else { requestNotifPermission(ok=>{ if(ok) fire(); }); }
-}
-
-// Schedule alarms via Service Worker for background delivery
-function scheduleAlarmsInSW(){
-  if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
-  const alarms=[];
-  routines.forEach(r=>{
-    if(!r.alarm||!r.alarm.on||!r.alarm.days||!r.alarm.days.length) return;
-    const ms=getNextAlarm(r.alarm);
-    if(ms!==null && ms>0 && ms<48*3600*1000){
-      alarms.push({routineName:r.name, fireAt:Date.now()+ms});
-    }
+  if(!window.OneSignalDeferred){ if(cb) cb(false); return; }
+  OneSignalDeferred.push(async function(OneSignal){
+    const permission = OneSignal.Notifications.permission;
+    if(permission){ if(cb) cb(true); return; }
+    await OneSignal.Notifications.requestPermission();
+    if(cb) cb(OneSignal.Notifications.permission);
   });
-  navigator.serviceWorker.controller.postMessage({type:'SCHEDULE_ALARMS',alarms});
 }
 
-// Request permission on first interaction
-document.addEventListener('click',function askPerm(){
-  requestNotifPermission(()=>scheduleAlarmsInSW());
-  document.removeEventListener('click',askPerm);
-},{once:true});
+// Schedule alarms — each alarm scheduled at most once via key guard
+function scheduleAlarmsInSW(){
+  OneSignalDeferred.push(async function(OneSignal){
+    if(!OneSignal.Notifications.permission) return;
+    routines.forEach(r => {
+      if(!r.alarm||!r.alarm.on||!r.alarm.days||!r.alarm.days.length) return;
+      const ms = getNextAlarm(r.alarm);
+      if(ms === null || ms <= 0 || ms > 48*3600*1000) return;
+      // Key based on routine name + minute bucket — prevents duplicates
+      const key = r.name + '@' + Math.round((Date.now()+ms)/60000);
+      if(_alarmTimers[key]) return; // already scheduled
+      _alarmTimers[key] = setTimeout(() => {
+        delete _alarmTimers[key];
+        if(OneSignal.Notifications.permission){
+          new Notification('⏰ ' + r.name, {
+            body: (typeof T!=='undefined'&&T.alarm_body)||'Your routine is starting! Tap to open.',
+            icon: 'https://kiffinja.github.io/routines-app/icon-192.png',
+            badge: 'https://kiffinja.github.io/routines-app/icon-192.png',
+            tag: 'alarm-' + r.name,
+            vibrate: [300,100,300,100,300],
+          });
+        }
+      }, ms);
+    });
+  });
+}
+
+// Request permission on first click, then schedule
+document.addEventListener('click', function askPerm(){
+  requestNotifPermission(ok => { if(ok) scheduleAlarmsInSW(); });
+}, {once: true});
 
 // ── ALARM ENGINE ─────────────────────────────────────
 function getNextAlarm(alarm) {
