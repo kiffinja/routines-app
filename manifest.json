@@ -1,6 +1,6 @@
 {
-  "name": "Routines",
-  "short_name": "Routines",
+  "name": "Routine",
+  "short_name": "Routine",
   "description": "Créez vos routines et exécutez-les tâche par tâche.",
   "start_url": "/routines-app/",
   "display": "standalone",
