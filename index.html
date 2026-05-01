@@ -219,6 +219,17 @@ body[data-theme="luxe"] .hue-slider { background: linear-gradient(to right,#1A1A
   </div>
 </div>
 
+<!-- NOTIF PERMISSION SCREEN -->
+<div id="notif-screen" class="hidden" style="position:fixed;inset:0;z-index:9001;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:2rem">
+  <div style="background:#fff;border-radius:28px;padding:2.5rem 2rem;max-width:360px;width:100%;text-align:center;box-shadow:0 28px 80px rgba(0,0,0,.3)">
+    <div style="font-size:3.5rem;margin-bottom:.8rem">🔔</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:.6rem;color:#1A1025">Activer les alarmes</div>
+    <div style="font-size:.9rem;color:#666;margin-bottom:2rem;line-height:1.5">Pour recevoir vos alarmes de routine même quand l'app est fermée, autorisez les notifications.</div>
+    <button id="notif-allow-btn" style="width:100%;padding:.85rem;background:#7C3AFF;border:none;border-radius:14px;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;margin-bottom:.7rem">🔔 Autoriser les notifications</button>
+    <button id="notif-skip-btn" style="width:100%;padding:.7rem;background:none;border:none;color:#888;font-family:'DM Sans',sans-serif;cursor:pointer;font-size:.88rem">Plus tard</button>
+  </div>
+</div>
+
 <!-- MODAL -->
 <div class="ov hidden" id="ov">
   <div class="modal">
@@ -1294,9 +1305,31 @@ document.getElementById('re').addEventListener('input', function(){
 document.querySelectorAll('.theme-opt').forEach(b => {
   b.addEventListener('click', () => {
     applyTheme(b.dataset.theme);
-    // If we're in onboarding flow, close theme screen after pick
     hideThemePicker();
+    // Si onboarding → montrer l'écran de permission notif
+    if(window._onboarding) showNotifScreen();
   });
+});
+
+// ── NOTIF PERMISSION SCREEN ─────────────────────────
+function showNotifScreen(){
+  const s = document.getElementById('notif-screen');
+  s.classList.remove('hidden');
+  s.style.display = 'flex';
+}
+function hideNotifScreen(){
+  const s = document.getElementById('notif-screen');
+  s.classList.add('hidden');
+  s.style.display = 'none';
+  window._onboarding = false;
+}
+
+document.getElementById('notif-allow-btn').addEventListener('click', () => {
+  hideNotifScreen();
+  requestNotifPermission(ok => { if(ok) scheduleAlarmsInSW(); });
+});
+document.getElementById('notif-skip-btn').addEventListener('click', () => {
+  hideNotifScreen();
 });
 
 // ── INIT LANG ──────────────────────────────────────
@@ -1319,6 +1352,7 @@ document.querySelectorAll('.theme-opt').forEach(b => {
     // Patch setLang to show theme picker after lang is chosen
     const _origSetLang = setLang;
     window._onboardingLangDone = false;
+    window._onboarding = true; // flag pour chaîner l'écran notif
     const langGrid = document.getElementById('lang-grid');
     // After lang grid is built, intercept each button to chain theme picker
     const observer = new MutationObserver(() => {
