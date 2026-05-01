@@ -1001,13 +1001,29 @@ async function cancelPreviousAlarms(){
   localStorage.removeItem('os_notif_ids');
 }
 
+async function getOneSignalPlayerId(retries = 5) {
+  return new Promise((resolve) => {
+    let attempts = 0;
+    const tryGet = () => {
+      OneSignalDeferred.push(async function(OneSignal) {
+        const id = OneSignal.User.pushSubscription.id;
+        if(id) { resolve(id); return; }
+        attempts++;
+        if(attempts < retries) setTimeout(tryGet, 1000);
+        else resolve(null);
+      });
+    };
+    tryGet();
+  });
+}
+
 async function scheduleAlarmsInSW(){
   OneSignalDeferred.push(async function(OneSignal){
     if(!OneSignal.Notifications.permission) return;
 
-    // Récupérer le player ID OneSignal
-    const playerId = OneSignal.User.pushSubscription.id;
-    if(!playerId) return;
+    // Attendre le player ID avec retry
+    const playerId = await getOneSignalPlayerId(10);
+    if(!playerId){ console.warn('OneSignal player ID not available'); return; }
 
     // Construire la liste des alarmes
     const alarms = [];
